@@ -84,7 +84,7 @@
     .modal {
       display: none; position: fixed; z-index: 20000; left: 0; top: 0;
       width: 100%; height: 100%; overflow: auto;
-      background-color: rgba(0,0,0,1); /* mayor opacidad para oscurecer */
+      background-color: rgba(0,0,0,1);
     }
     .modal-content {
       background-color: #292929; margin: 5% auto; padding: 20px;
@@ -191,11 +191,69 @@
     
     /* Nuevas reglas para separar el contenedor de práctica de la barra de progreso */
     #practiceOptions {
-      margin-bottom: 1em; /* Espacio inferior para separar del siguiente elemento */
+      margin-bottom: 1em;
     }
     
     #progressBarContainer {
-      margin-top: 1em; /* Espacio superior para separar de la sección anterior */
+      margin-top: 1em;
+    }
+    
+    /* ------------------ NUEVAS REGLAS PARA CUADRÍCULAS Y MODAL INFERIOR ------------------ */
+    
+    /* Grid para palabras seleccionadas en Aprendizaje */
+    .custom-practice-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+    }
+    
+    .custom-practice-card {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      position: relative;
+    }
+    .custom-practice-card button {
+      margin-top: 5px;
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    /* Modal inferior para ver más detalles (se desliza desde abajo) */
+    .modal-bottom {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      max-height: 80%;
+      background: #fff;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+      overflow-y: auto;
+      transition: transform 0.3s ease-out;
+      transform: translateY(100%);
+      z-index: 20000;
+    }
+    .modal-bottom.active {
+      display: block;
+      transform: translateY(0);
+    }
+    .modal-bottom .modal-content {
+      padding: 20px;
+      position: relative;
+    }
+    .modal-bottom .closeModal {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -432,13 +490,10 @@
         <div class="aprendizaje-block" style="text-align: center;">
           <button id="openAddTableModalBtn" class="add-word-btn">+</button>
         </div>
-        <!-- Palabras seleccionadas -->
+        <!-- Palabras seleccionadas en cuadricula -->
         <div class="aprendizaje-block">
           <h2 style="font-size: 1em; margin-bottom: 0.5em;">Palabras Seleccionadas</h2>
-          <table id="customPracticeTable">
-            <thead></thead>
-            <tbody></tbody>
-          </table>
+          <div id="customPracticeGrid" class="custom-practice-grid"></div>
           <!-- Contenedor para botones de Focus Mode y Guardar Lista alineados -->
           <div class="focus-mode-controls" style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
             <button id="btnFocusMode">Iniciar Focus Mode</button>
@@ -537,15 +592,23 @@
       <div id="focusDetails" class="details hidden"></div>
       <!-- Botones de acción -->
       <div id="focusButtons" style="margin-top: 10px;">
-        <!-- En memorization se muestra el botón de Confirmar Memorización -->
         <button id="btnConfirmMemorization">Confirmar Memorización</button>
-        <!-- En fase de test se mostrará inicialmente el botón "Mostrar" -->
         <button id="focusBtnMostrar" class="hidden">Mostrar</button>
         <button id="focusBtnBien" class="hidden" style="background:#7f7; border:2px solid #0c0;">Bien</button>
         <button id="focusBtnMal" class="hidden" style="background:#f77; border:2px solid #c00;">Mal</button>
       </div>
       <div style="margin-top:10px;">
         <button id="btnExitFocusMode">Salir de Focus Mode</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal inferior para ver más detalles de la palabra (se desliza desde abajo) -->
+  <div id="detailModal" class="modal-bottom">
+    <div class="modal-content">
+      <span class="closeModal" id="closeDetailModal">×</span>
+      <div id="detailModalContent">
+        <!-- Se mostrarán los detalles de la palabra -->
       </div>
     </div>
   </div>
@@ -616,8 +679,8 @@
       darkTheme: false,
       notificationsEnabled: true,
       newWordsCount: 10,
-      focusBlockSize: 5,    // cantidad de preguntas por bloque
-      focusTestSize: 10     // total de preguntas para Focus Mode
+      focusBlockSize: 5,
+      focusTestSize: 10
     };
 
     // Estado de práctica
@@ -634,10 +697,10 @@
     let unsubPersonalizedLists = null;
 
     // Variables para Focus Mode
-    let focusCards = [];     // Palabras a usar en Focus Mode
-    let focusBlockIndex = 0; // Bloque actual (0-based)
-    let focusCurrentIndex = 0; // Índice dentro del bloque o test final
-    let focusPhase = "";     // "memorization", "test" o "finalTest"
+    let focusCards = [];
+    let focusBlockIndex = 0;
+    let focusCurrentIndex = 0;
+    let focusPhase = "";
 
     // Paginación en "Gestionar"
     let currentPage = 1;
@@ -885,7 +948,9 @@
       if (unsubPersonalizedLists) unsubPersonalizedLists();
       unsubPersonalizedLists = subscribeToPersonalizedLists();
       customPracticeList = [];
-      renderCustomPracticeTable(); renderCustomPracticeResultsHeader();
+      // Actualizamos la vista de palabras seleccionadas en cuadricula en vez de tabla:
+      renderCustomPracticeGrid();
+      renderCustomPracticeResultsHeader();
       renderCustomPracticeResultsBody(words);
       currentIndex = 0; correctCount = 0; sessionPracticed = 0;
       responses = []; currentStreak = 0; practiceSessionWords = [];
@@ -1017,7 +1082,6 @@
       }
     }
 
-    // Se modifica la función para que al presionar Enter en cada campo se pase al siguiente
     function generarFormularioDinamico(fields) {
       const form = document.getElementById("wordForm");
       if (!form) return;
@@ -1047,7 +1111,6 @@
       submitBtn.type = "submit";
       form.appendChild(submitBtn);
 
-      // Agregar evento para que Enter pase al siguiente campo (excepto el último)
       const inputs = form.querySelectorAll("input, textarea");
       inputs.forEach((input, index) => {
         input.addEventListener("keydown", function(e) {
@@ -1568,7 +1631,6 @@
     btnBien.addEventListener("click", () => responder(true));
     btnMal.addEventListener("click", () => responder(false));
 
-    // Listener de teclas rápidas tanto para práctica como para Focus Mode
     document.addEventListener("keydown", (e) => {
       if (document.getElementById("focusModeModal").style.display === "block") {
         const focusBtnMostrar = document.getElementById("focusBtnMostrar");
@@ -1684,7 +1746,6 @@
       statsArray.forEach(obj => {
         obj.total = obj.failCount + obj.correctCount;
         obj.accuracy = obj.total > 0 ? ((obj.correctCount / obj.total) * 100).toFixed(2) + "%" : "0%";
-        // Se elimina la calificación ya que no se muestra en la tabla actualizada
       });
       statsArray.sort((a, b) => {
         let diff = 0;
@@ -1835,12 +1896,12 @@
 
     function loadPersonalizedList(wordIds) {
       customPracticeList = words.filter(w => wordIds.includes(w.id));
-      renderCustomPracticeTable();
+      // Actualizamos la cuadricula en lugar de la tabla:
+      renderCustomPracticeGrid();
     }
 
     const customPracticeSearch = document.getElementById("customPracticeSearch");
     const customPracticeResultsTable = document.getElementById("customPracticeResults");
-    const customPracticeTable = document.getElementById("customPracticeTable");
     const startCustomPracticeBtn = document.getElementById("startCustomPractice");
 
     function renderCustomPracticeResultsHeader() {
@@ -1893,73 +1954,66 @@
       const yaExiste = customPracticeList.find(x => x.id === item.id);
       if (yaExiste) { alert("Esta palabra ya está en la lista personalizada."); return; }
       customPracticeList.push(item);
-      renderCustomPracticeTable();
+      // Actualizamos la vista de la cuadricula
+      renderCustomPracticeGrid();
       renderCustomPracticeResultsBody(words);
     }
 
-    function renderCustomPracticeTable() {
-      if (!customPracticeTable) return;
-      const thead = customPracticeTable.querySelector("thead");
-      const tbody = customPracticeTable.querySelector("tbody");
-      if (!thead || !tbody) return;
-      thead.innerHTML = ""; tbody.innerHTML = "";
-      if (wordFieldsOrder.length > 0) {
-        const headerRow = document.createElement("tr");
-        wordFieldsOrder.forEach(k => {
-          const f = wordFields.find(x => x.key === k);
-          if (f) {
-            const th = document.createElement("th");
-            th.textContent = f.label;
-            headerRow.appendChild(th);
-          }
-        });
-        const thEliminar = document.createElement("th");
-        thEliminar.textContent = "Quitar";
-        headerRow.appendChild(thEliminar);
-        thead.appendChild(headerRow);
-      }
+    /********************************
+     * NUEVAS FUNCIONES: RENDERIZAR CUADRÍCULA Y MODAL
+     ********************************/
+    function renderCustomPracticeGrid() {
+      const grid = document.getElementById("customPracticeGrid");
+      if (!grid) return;
+      grid.innerHTML = "";
+      let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : (wordFieldsOrder[0] || "");
       customPracticeList.forEach((w, idx) => {
-        const row = document.createElement("tr");
-        row.classList.add("highlighted-row");
-        wordFieldsOrder.forEach(k => {
-          const td = document.createElement("td");
-          td.textContent = w[k] || "";
-          row.appendChild(td);
+        const card = document.createElement("div");
+        card.classList.add("custom-practice-card");
+        
+        // Mostrar el campo frontal
+        const frontText = document.createElement("p");
+        frontText.textContent = w[frontField] || "";
+        card.appendChild(frontText);
+        
+        // Botón "Ver más"
+        const btnVerMas = document.createElement("button");
+        btnVerMas.textContent = "Ver más";
+        btnVerMas.addEventListener("click", () => {
+          openDetailModal(w);
         });
-        const tdEliminar = document.createElement("td");
+        card.appendChild(btnVerMas);
+        
+        // Botón "Quitar"
         const btnQuitar = document.createElement("button");
         btnQuitar.textContent = "Quitar";
         btnQuitar.style.background = "#f44336";
         btnQuitar.style.color = "#fff";
-        btnQuitar.onclick = () => {
+        btnQuitar.addEventListener("click", () => {
           customPracticeList.splice(idx, 1);
-          renderCustomPracticeTable();
+          renderCustomPracticeGrid();
           renderCustomPracticeResultsBody(words);
-        };
-        tdEliminar.appendChild(btnQuitar);
-        row.appendChild(tdEliminar);
-        tbody.appendChild(row);
+        });
+        card.appendChild(btnQuitar);
+        
+        grid.appendChild(card);
       });
     }
 
-    customPracticeSearch.addEventListener("input", () => {
-      const term = customPracticeSearch.value.toLowerCase();
-      if (term.trim() === "") { renderCustomPracticeResultsBody(words); }
-      else {
-        const filtered = words.filter(w =>
-          wordFieldsOrder.some(k => String(w[k] || "").toLowerCase().includes(term))
-        );
-        renderCustomPracticeResultsBody(filtered);
-      }
-    });
+    function openDetailModal(word) {
+      let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : (wordFieldsOrder[0] || "");
+      let details = "";
+      wordFields.forEach(field => {
+        if (field.key !== frontField) {
+          details += `<p><strong>${field.label}:</strong> ${word[field.key] || ""}</p>`;
+        }
+      });
+      document.getElementById("detailModalContent").innerHTML = details;
+      document.getElementById("detailModal").classList.add("active");
+    }
 
-    document.getElementById("btnSaveList").addEventListener("click", () => {
-      const name = document.getElementById("listNameInput").value.trim();
-      if (!name) { alert("Ingresa un nombre para la lista."); return; }
-      if (customPracticeList.length === 0) { alert("La lista está vacía."); return; }
-      const wordIds = customPracticeList.map(w => w.id);
-      savePersonalizedList(name, wordIds);
-      document.getElementById("listNameInput").value = "";
+    document.getElementById("closeDetailModal").addEventListener("click", () => {
+      document.getElementById("detailModal").classList.remove("active");
     });
 
     startCustomPracticeBtn.addEventListener("click", () => {
@@ -1977,7 +2031,6 @@
     /********************************
      * FOCUS MODE (POP UP)
      ********************************/
-    // Inicia Focus Mode usando las palabras seleccionadas (al menos focusTestSize)
     function startFocusModeSession() {
       if (customPracticeList.length < settings.focusTestSize) {
         alert("Necesitas al menos " + settings.focusTestSize + " palabras para Focus Mode.");
@@ -1985,7 +2038,6 @@
       }
       focusCards = customPracticeList.slice(0, settings.focusTestSize);
       focusBlockIndex = 0; focusPhase = "memorization"; focusCurrentIndex = 0;
-      // Actualiza ajustes de Focus Mode
       settings.focusBlockSize = parseInt(document.getElementById("focusBlockSize").value);
       settings.focusTestSize = parseInt(document.getElementById("focusTestSize").value);
       openFocusModal();
@@ -2037,7 +2089,6 @@
       flashcard.style.borderBottom = "4px solid transparent";
       flashcard.textContent = card[frontField] || "?";
       if (focusPhase === "memorization") {
-        // En memorization se muestra el detalle completo junto con el botón de Confirmar Memorización
         document.getElementById("focusDetails").innerHTML = renderCardDetails(card, frontField);
         document.getElementById("focusDetails").classList.remove("hidden");
         document.getElementById("btnConfirmMemorization").classList.remove("hidden");
@@ -2045,7 +2096,6 @@
         document.getElementById("focusBtnBien").classList.add("hidden");
         document.getElementById("focusBtnMal").classList.add("hidden");
       } else {
-        // En test o finalTest solo se muestra el frente inicialmente; se activa el botón "Mostrar"
         document.getElementById("focusDetails").classList.add("hidden");
         document.getElementById("btnConfirmMemorization").classList.add("hidden");
         document.getElementById("focusBtnMostrar").classList.remove("hidden");
@@ -2070,7 +2120,6 @@
       }
     });
 
-    // En fase de test, se utiliza un botón Mostrar para revelar el detalle
     document.getElementById("focusBtnMostrar").addEventListener("click", () => {
       let card;
       if (focusPhase === "test") {
@@ -2109,7 +2158,6 @@
     function openFocusModal() { document.getElementById("focusModeModal").style.display = "block"; }
     function closeFocusModal() { document.getElementById("focusModeModal").style.display = "none"; }
 
-    // Asigna el evento al botón Focus Mode en la sección Aprendizaje
     document.getElementById("btnFocusMode").addEventListener("click", startFocusModeSession);
 
     /********************************
@@ -2239,9 +2287,6 @@
       return details;
     }
 
-    /********************************
-     * AL CARGAR
-     ********************************/
     window.addEventListener("DOMContentLoaded", () => {
       loadSettings(); initGlobalStatsSorting(); showSection("sectionCaratulas");
       const storedCatId = localStorage.getItem("currentCategoryId");
@@ -2254,7 +2299,6 @@
         tabPalabras.addEventListener("click", () => { tabPalabrasContent.classList.add("active"); tabCamposContent.classList.remove("active"); });
         tabCampos.addEventListener("click", () => { tabCamposContent.classList.add("active"); tabPalabrasContent.classList.remove("active"); });
       }
-      // Asignar eventos a botones que no funcionaban
       document.getElementById("openAddTableModalBtn").addEventListener("click", () => { document.getElementById("addTableModal").style.display = "block"; });
       document.getElementById("closeAddTableModal").addEventListener("click", () => { document.getElementById("addTableModal").style.display = "none"; });
       document.getElementById("toggleSavedLists").addEventListener("click", () => { document.getElementById("savedListsContainer").classList.toggle("hidden"); });
