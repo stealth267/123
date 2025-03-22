@@ -1662,13 +1662,22 @@
       else return "F";
     }
     function renderGlobalStats() {
+      const globalStatsEl = document.getElementById("globalStats");
+      const failTableBody = document.querySelector("#failTable tbody");
+      if (!failTableBody) return;
+
+      // Limpia siempre el tbody
+      failTableBody.innerHTML = "";
+
+      // Si no hay datos, muestra una fila con colspan que preserve las 7 columnas
       if (!globalHistory || globalHistory.length === 0) {
-        const globalStatsEl = document.getElementById("globalStats");
         if (globalStatsEl) { globalStatsEl.textContent = "No hay estadísticas globales disponibles para esta carátula."; }
-        const failTableBody = document.querySelector("#failTable tbody");
-        if (failTableBody) failTableBody.innerHTML = "";
+        const row = document.createElement("tr");
+        row.innerHTML = `<td colspan="7" style="text-align:center;">No hay datos disponibles</td>`;
+        failTableBody.appendChild(row);
         return;
       }
+
       let statsMap = {};
       globalHistory.forEach(entry => {
         const id = entry.id;
@@ -1688,11 +1697,7 @@
         else if (a[currentSortField] > b[currentSortField]) diff = 1;
         return currentSortOrder === 'asc' ? diff : -diff;
       });
-      const globalStatsEl = document.getElementById("globalStats");
       if (globalStatsEl) { globalStatsEl.textContent = `Total de palabras: ${words.length}`; }
-      const tbody = document.querySelector("#failTable tbody");
-      if (!tbody) return;
-      tbody.innerHTML = "";
       statsArray.forEach(obj => {
         const row = document.createElement("tr");
         row.innerHTML = `
@@ -1704,7 +1709,7 @@
           <td style="background-color: ${obtenerColor(obj)}">${obj.calificacion}</td>
           <td><button onclick="resetStatsForWord('${obj.id}')">Resetear</button></td>
         `;
-        tbody.appendChild(row);
+        failTableBody.appendChild(row);
       });
     }
 
@@ -1837,18 +1842,15 @@
       renderCustomPracticeTable();
     }
 
-    const customPracticeSearch = document.getElementById("customPracticeSearch");
-    const customPracticeResultsTable = document.getElementById("customPracticeResults");
-    const customPracticeTable = document.getElementById("customPracticeTable");
-    const startCustomPracticeBtn = document.getElementById("startCustomPractice");
-
+    // MODIFICACIÓN: Se limita a mostrar solo 2 columnas (más la columna de "Acción") en el pop up.
     function renderCustomPracticeResultsHeader() {
       if (!customPracticeResultsTable) return;
       const thead = customPracticeResultsTable.querySelector("thead");
       if (!thead) return;
       thead.innerHTML = "";
       const headerRow = document.createElement("tr");
-      wordFieldsOrder.forEach(k => {
+      // Solo mostramos las dos primeras columnas de wordFieldsOrder
+      wordFieldsOrder.slice(0,2).forEach(k => {
         const f = wordFields.find(x => x.key === k);
         if (f) {
           const th = document.createElement("th");
@@ -1862,6 +1864,7 @@
       thead.appendChild(headerRow);
     }
 
+    // MODIFICACIÓN: En el cuerpo de la tabla del pop up se muestran solo las 2 primeras columnas
     function renderCustomPracticeResultsBody(filtered) {
       if (!customPracticeResultsTable) return;
       const tbody = customPracticeResultsTable.querySelector("tbody");
@@ -1871,7 +1874,7 @@
         const row = document.createElement("tr");
         const isSelected = customPracticeList.some(x => x.id === item.id);
         if(isSelected) row.classList.add("selected-result");
-        wordFieldsOrder.forEach(k => {
+        wordFieldsOrder.slice(0,2).forEach(k => {
           const td = document.createElement("td");
           td.textContent = item[k] || "";
           row.appendChild(td);
@@ -1888,13 +1891,10 @@
       });
     }
 
-    function addToCustomPractice(item) {
-      const yaExiste = customPracticeList.find(x => x.id === item.id);
-      if (yaExiste) { alert("Esta palabra ya está en la lista personalizada."); return; }
-      customPracticeList.push(item);
-      renderCustomPracticeTable();
-      renderCustomPracticeResultsBody(words);
-    }
+    const customPracticeSearch = document.getElementById("customPracticeSearch");
+    const customPracticeResultsTable = document.getElementById("customPracticeResults");
+    const customPracticeTable = document.getElementById("customPracticeTable");
+    const startCustomPracticeBtn = document.getElementById("startCustomPractice");
 
     function renderCustomPracticeTable() {
       if (!customPracticeTable) return;
