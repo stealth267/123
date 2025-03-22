@@ -153,7 +153,7 @@
     #sectionNuevas td {
       padding: 10px;
     }
-    /* Estilos para el modal de agregar palabras (pop up) */
+    /* Modal de agregar palabras: se muestra solo las primeras 2 columnas y una columna de acción */
     #customPracticeResultsContainer {
       max-height: 300px;
       overflow-y: auto;
@@ -162,8 +162,7 @@
     .selected-result {
       background-color: #d0f0c0;
     }
-    
-    /* Nuevas reglas para mostrar la cuadricula en la sección Aprendizaje */
+    /* Cuadrícula de palabras personalizadas */
     .custom-practice-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -183,7 +182,6 @@
       font-size: 14px;
       cursor: pointer;
     }
-    
     /* Modal inferior para ver más detalles de la palabra */
     .modal-bottom {
       display: none;
@@ -217,7 +215,6 @@
       font-weight: bold;
       cursor: pointer;
     }
-    
     /* Ajustes para pantallas pequeñas (iPhone, etc.) */
     @media only screen and (max-width: 600px) {
       .caratula-cards {
@@ -242,8 +239,7 @@
          padding: 8px;
       }
     }
-    
-    /* Nuevas reglas para separar el contenedor de práctica de la barra de progreso */
+    /* Separador entre la barra de progreso y el contenedor de práctica */
     #practiceOptions {
       margin-bottom: 1em;
     }
@@ -291,9 +287,7 @@
       <section id="sectionCaratulas" class="active">
         <h1>Carátulas / Temas</h1>
         <p>puedes eliminar la carátula o reiniciar sus estadísticas.</p>  
-        <!-- Contenedor de cards -->
         <div class="caratula-cards" id="caratulaCardsContainer"></div>
-        <!-- Modal para crear carátula -->
         <div id="createCaratulaModal" class="modal">
           <div class="modal-content">
             <span class="closeModal" id="closeCreateModal">×</span>
@@ -469,21 +463,20 @@
         <div class="aprendizaje-block" id="savedListsWrapper">
           <button id="toggleSavedLists" class="toggle-saved-lists">≡</button>
           <div id="savedListsContainer" class="saved-lists-container hidden">
+            <!-- Aquí se renderizan las listas guardadas -->
           </div>
         </div>
         <div class="aprendizaje-block" style="text-align: center;">
           <button id="openAddTableModalBtn" class="add-word-btn">+</button>
         </div>
-        <!-- Aquí se muestra la cuadricula de palabras seleccionadas -->
+        <!-- Contenedor de la cuadricula de palabras seleccionadas -->
         <div class="aprendizaje-block">
           <h2 style="font-size: 1em; margin-bottom: 0.5em;">Palabras Seleccionadas</h2>
           <div id="customPracticeGrid" class="custom-practice-grid"></div>
-          <div class="focus-mode-controls" style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
-            <button id="btnFocusMode">Iniciar Focus Mode</button>
-            <div class="list-save-container" style="display: flex; gap: 10px; align-items: center;">
-              <input type="text" id="listNameInput" placeholder="Nombre de la lista"/>
-              <button id="btnSaveList">Guardar Lista</button>
-            </div>
+          <!-- Contenedor para guardar lista: al guardar se crea un nuevo documento en la colección -->
+          <div class="list-save-container" style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" id="listNameInput" placeholder="Nombre de la lista"/>
+            <button id="btnSaveList">Guardar Lista</button>
           </div>
         </div>
         <div style="text-align: center;">
@@ -558,7 +551,7 @@
     </div>
   </div>
 
-  <!-- Modal de Focus Mode (pop up que oscurece el fondo) -->
+  <!-- Modal de Focus Mode -->
   <div id="focusModeModal" class="modal">
     <div class="modal-content" style="max-width: 500px; text-align: center;">
       <h2 id="focusPhaseTitle">Focus Mode</h2>
@@ -1334,6 +1327,16 @@
       document.getElementById("fieldsForm").reset();
     });
 
+    // EVENTO PARA GUARDAR LISTA PERSONALIZADA
+    document.getElementById("btnSaveList").addEventListener("click", () => {
+      const name = document.getElementById("listNameInput").value.trim();
+      if (!name) { alert("Ingresa un nombre para la lista."); return; }
+      if (customPracticeList.length === 0) { alert("La lista está vacía."); return; }
+      const wordIds = customPracticeList.map(w => w.id);
+      savePersonalizedList(name, wordIds);
+      document.getElementById("listNameInput").value = "";
+    });
+
     window.exportData = function() {
       const dataStr = JSON.stringify(words, null, 2);
       const blob = new Blob([dataStr], { type: "application/json" });
@@ -1828,7 +1831,7 @@
       if (!thead) return;
       thead.innerHTML = "";
       const headerRow = document.createElement("tr");
-      // Solo las primeras 2 columnas
+      // Se muestran las primeras 2 columnas
       wordFieldsOrder.slice(0,2).forEach(k => {
         const f = wordFields.find(x => x.key === k);
         if (f) {
@@ -1843,7 +1846,6 @@
       thead.appendChild(headerRow);
     }
 
-    // Mostrar solo las primeras 2 columnas y la columna con el botón Agregar
     function renderCustomPracticeResultsBody(filtered) {
       if (!customPracticeResultsTable) return;
       const tbody = customPracticeResultsTable.querySelector("tbody");
@@ -1921,6 +1923,16 @@
 
     document.getElementById("closeDetailModal").addEventListener("click", () => {
       document.getElementById("detailModal").classList.remove("active");
+    });
+
+    // Evento para guardar lista personalizada (permite crear múltiples listas)
+    document.getElementById("btnSaveList").addEventListener("click", () => {
+      const name = document.getElementById("listNameInput").value.trim();
+      if (!name) { alert("Ingresa un nombre para la lista."); return; }
+      if (customPracticeList.length === 0) { alert("La lista está vacía."); return; }
+      const wordIds = customPracticeList.map(w => w.id);
+      savePersonalizedList(name, wordIds);
+      document.getElementById("listNameInput").value = "";
     });
 
     startCustomPracticeBtn.addEventListener("click", () => {
