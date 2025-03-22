@@ -153,7 +153,7 @@
     #sectionNuevas td {
       padding: 10px;
     }
-    /* Modal para agregar palabras: se muestran solo las primeras 2 columnas y la columna de acción */
+    /* Modal de agregar palabras: se muestra solo las primeras 2 columnas y una columna de acción */
     #customPracticeResultsContainer {
       max-height: 300px;
       overflow-y: auto;
@@ -469,9 +469,11 @@
         <div class="aprendizaje-block" style="text-align: center;">
           <button id="openAddTableModalBtn" class="add-word-btn">+</button>
         </div>
+        <!-- Contenedor de la cuadricula de palabras seleccionadas -->
         <div class="aprendizaje-block">
           <h2 style="font-size: 1em; margin-bottom: 0.5em;">Palabras Seleccionadas</h2>
           <div id="customPracticeGrid" class="custom-practice-grid"></div>
+          <!-- Contenedor para guardar lista: al guardar se crea un nuevo documento en la colección -->
           <div class="list-save-container" style="display: flex; gap: 10px; align-items: center;">
             <input type="text" id="listNameInput" placeholder="Nombre de la lista"/>
             <button id="btnSaveList">Guardar Lista</button>
@@ -575,1049 +577,1639 @@
   <div id="detailModal" class="modal-bottom">
     <div class="modal-content">
       <span class="closeModal" id="closeDetailModal">×</span>
-      <div id="detailModalContent"></div>
+      <div id="detailModalContent">
+      </div>
     </div>
   </div>
 
-  <!-- SCRIPT PRINCIPAL: Se envuelve toda la inicialización en DOMContentLoaded -->
+  <!-- SCRIPT PRINCIPAL -->
   <script type="module">
-    window.addEventListener("DOMContentLoaded", () => {
-      // IMPORTS DE FIREBASE (MODULAR)
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-      import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
-      import {
-        getAuth,
-        createUserWithEmailAndPassword,
-        signInWithEmailAndPassword,
-        signOut,
-        onAuthStateChanged
-      } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-      import {
-        getFirestore,
-        doc,
-        setDoc,
-        onSnapshot,
-        collection,
-        addDoc,
-        query,
-        getDocs,
-        deleteDoc
-      } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
-      import { onSnapshot as onSnapshotQuery } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
-      
-      // CONFIGURACIÓN DE FIREBASE
-      const firebaseConfig = {
-        apiKey: "AIzaSyBnl6pd_m4AsypD1IPJ11FhgZQf8XFDEqw",
-        authDomain: "appz-571f4.firebaseapp.com",
-        projectId: "appz-571f4",
-        storageBucket: "appz-571f4.firebasestorage.app",
-        messagingSenderId: "709288105818",
-        appId: "1:709288105818:web:8141a1a00683d551960563",
-        measurementId: "G-K62SLNN75N"
-      };
-      
-      const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
-      
-      // Variables globales
-      let categories = [];        
-      let currentCategoryId = ""; 
-      let wordFields = [];
-      let wordFieldsOrder = [];
-      let words = [];
-      let globalHistory = [];
-      
-      let settings = {
-        keyMostrar: "m",
-        keyCorrect: "k",
-        keyIncorrect: "l",
-        problemThreshold: 2,
-        audioEnabled: true,
-        feedbackDelay: 500,
-        darkTheme: false,
-        notificationsEnabled: true,
-        newWordsCount: 10,
-        focusBlockSize: 5,
-        focusTestSize: 10
-      };
-      
-      let practiceSessionWords = [];
-      let currentIndex = 0, correctCount = 0, sessionPracticed = 0;
-      let responses = [];
-      let currentStreak = 0;
-      let weightedMode = false;
-      
-      let currentEditIndex = null;
-      let customPracticeList = [];
-      let personalizedLists = [];
-      let unsubPersonalizedLists = null;
-      
-      let focusCards = [];
-      let focusBlockIndex = 0;
-      let focusCurrentIndex = 0;
-      let focusPhase = "";
-      
-      let currentPage = 1;
-      const pageSize = 100;
-      
-      let currentSortField = 'failCount';
-      let currentSortOrder = 'desc';
-      let draggedIndex = null;
-      
-      let fileToImport = null;
-      
-      // MENÚ LATERAL Y SECCIONES
-      const menuToggleBtn = document.getElementById("menuToggle");
-      const sideNav = document.getElementById("sideNav");
-      const mainContent = document.getElementById("mainContent");
-      
-      menuToggleBtn.addEventListener("click", () => {
-        sideNav.classList.toggle("open");
-        mainContent.style.marginRight = sideNav.classList.contains("open") ? "240px" : "0";
-      });
-      
-      function showSection(sectionId) {
-        sideNav.classList.remove("open");
-        mainContent.style.marginRight = "0";
-        const sections = [
-          "sectionCaratulas", "sectionPracticar", "sectionGestionar",
-          "sectionEstadisticas", "sectionNuevas", "sectionAjustes", "sectionLogin"
-        ];
-        sections.forEach(id => document.getElementById(id).classList.remove("active"));
-        document.getElementById(sectionId).classList.add("active");
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      onSnapshot,
+      collection,
+      addDoc,
+      query,
+      getDocs,
+      deleteDoc
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+    import { onSnapshot as onSnapshotQuery } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBnl6pd_m4AsypD1IPJ11FhgZQf8XFDEqw",
+      authDomain: "appz-571f4.firebaseapp.com",
+      projectId: "appz-571f4",
+      storageBucket: "appz-571f4.firebasestorage.app",
+      messagingSenderId: "709288105818",
+      appId: "1:709288105818:web:8141a1a00683d551960563",
+      measurementId: "G-K62SLNN75N"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let categories = [];        
+    let currentCategoryId = ""; 
+    let wordFields = [];
+    let wordFieldsOrder = [];
+    let words = [];
+    let globalHistory = [];
+
+    let settings = {
+      keyMostrar: "m",
+      keyCorrect: "k",
+      keyIncorrect: "l",
+      problemThreshold: 2,
+      audioEnabled: true,
+      feedbackDelay: 500,
+      darkTheme: false,
+      notificationsEnabled: true,
+      newWordsCount: 10,
+      focusBlockSize: 5,
+      focusTestSize: 10
+    };
+
+    let practiceSessionWords = [];
+    let currentIndex = 0, correctCount = 0, sessionPracticed = 0;
+    let responses = [];
+    let currentStreak = 0;
+    let weightedMode = false;
+
+    let currentEditIndex = null;
+    let customPracticeList = [];
+    let personalizedLists = [];
+    let unsubPersonalizedLists = null;
+
+    let focusCards = [];
+    let focusBlockIndex = 0;
+    let focusCurrentIndex = 0;
+    let focusPhase = "";
+
+    let currentPage = 1;
+    const pageSize = 100;
+
+    let currentSortField = 'failCount';
+    let currentSortOrder = 'desc';
+    let draggedIndex = null;
+
+    let fileToImport = null;
+
+    const menuToggleBtn = document.getElementById("menuToggle");
+    const sideNav = document.getElementById("sideNav");
+    const mainContent = document.getElementById("mainContent");
+
+    menuToggleBtn.addEventListener("click", () => {
+      sideNav.classList.toggle("open");
+      mainContent.style.marginRight = sideNav.classList.contains("open") ? "240px" : "0";
+    });
+
+    function showSection(sectionId) {
+      sideNav.classList.remove("open");
+      mainContent.style.marginRight = "0";
+      const sections = [
+        "sectionCaratulas", "sectionPracticar", "sectionGestionar",
+        "sectionEstadisticas", "sectionNuevas", "sectionAjustes", "sectionLogin"
+      ];
+      sections.forEach(id => document.getElementById(id).classList.remove("active"));
+      document.getElementById(sectionId).classList.add("active");
+    }
+
+    document.getElementById("btnCaratulas").addEventListener("click", () => showSection("sectionCaratulas"));
+    document.getElementById("btnPracticar").addEventListener("click", () => showSection("sectionPracticar"));
+    document.getElementById("btnGestionar").addEventListener("click", () => showSection("sectionGestionar"));
+    document.getElementById("btnEstadisticas").addEventListener("click", () => {
+      showSection("sectionEstadisticas");
+      renderGlobalStats(); renderSessionStats();
+    });
+    document.getElementById("btnNuevas").addEventListener("click", () => { showSection("sectionNuevas"); });
+    document.getElementById("btnAjustes").addEventListener("click", () => showSection("sectionAjustes"));
+    document.getElementById("btnLoginSection").addEventListener("click", () => showSection("sectionLogin"));
+
+    const loginEmail = document.getElementById("loginEmail");
+    const loginPassword = document.getElementById("loginPassword");
+    const btnRegister = document.getElementById("btnRegister");
+    const btnLogin = document.getElementById("btnLogin");
+    const btnLogout = document.getElementById("btnLogout");
+    const loginStatus = document.getElementById("loginStatus");
+
+    btnRegister.addEventListener("click", async () => {
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
+        loginStatus.textContent = "Registrado: " + cred.user.email;
+      } catch (err) {
+        loginStatus.textContent = "Error registro: " + err.message;
       }
-      
-      document.getElementById("btnCaratulas").addEventListener("click", () => showSection("sectionCaratulas"));
-      document.getElementById("btnPracticar").addEventListener("click", () => showSection("sectionPracticar"));
-      document.getElementById("btnGestionar").addEventListener("click", () => showSection("sectionGestionar"));
-      document.getElementById("btnEstadisticas").addEventListener("click", () => {
-        showSection("sectionEstadisticas");
-        renderGlobalStats(); renderSessionStats();
-      });
-      document.getElementById("btnNuevas").addEventListener("click", () => { showSection("sectionNuevas"); });
-      document.getElementById("btnAjustes").addEventListener("click", () => showSection("sectionAjustes"));
-      document.getElementById("btnLoginSection").addEventListener("click", () => showSection("sectionLogin"));
-      
-      // AUTENTICACIÓN
-      const loginEmail = document.getElementById("loginEmail");
-      const loginPassword = document.getElementById("loginPassword");
-      const btnRegister = document.getElementById("btnRegister");
-      const btnLogin = document.getElementById("btnLogin");
-      const btnLogout = document.getElementById("btnLogout");
-      const loginStatus = document.getElementById("loginStatus");
-      
-      btnRegister.addEventListener("click", async () => {
-        try {
-          const cred = await createUserWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
-          loginStatus.textContent = "Registrado: " + cred.user.email;
-        } catch (err) {
-          loginStatus.textContent = "Error registro: " + err.message;
-        }
-      });
-      btnLogin.addEventListener("click", async () => {
-        try {
-          const cred = await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
-          loginStatus.textContent = "Sesión iniciada: " + cred.user.email;
-        } catch (err) {
-          loginStatus.textContent = "Error login: " + err.message;
-        }
-      });
-      btnLogout.addEventListener("click", async () => {
-        await signOut(auth);
-        localStorage.clear();
+    });
+    btnLogin.addEventListener("click", async () => {
+      try {
+        const cred = await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
+        loginStatus.textContent = "Sesión iniciada: " + cred.user.email;
+      } catch (err) {
+        loginStatus.textContent = "Error login: " + err.message;
+      }
+    });
+    btnLogout.addEventListener("click", async () => {
+      await signOut(auth);
+      localStorage.clear();
+      words = []; wordFields = []; wordFieldsOrder = []; globalHistory = [];
+      practiceSessionWords = []; currentIndex = 0; correctCount = 0;
+      sessionPracticed = 0; responses = []; currentStreak = 0;
+      loginStatus.textContent = "Sesión cerrada.";
+      location.reload();
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginStatus.textContent = `Logueado como: ${user.email}`;
+        btnLogout.style.display = "inline-block";
+        subscribeToCategories();
+      } else {
+        loginStatus.textContent = "No hay usuario logueado";
+        btnLogout.style.display = "none";
         words = []; wordFields = []; wordFieldsOrder = []; globalHistory = [];
-        practiceSessionWords = []; currentIndex = 0; correctCount = 0;
-        sessionPracticed = 0; responses = []; currentStreak = 0;
-        loginStatus.textContent = "Sesión cerrada.";
-        location.reload();
+        renderizarTabla(); generarFormularioDinamico([]); updateFieldsList();
+        const frontSelect = document.getElementById("frontField");
+        if (frontSelect) frontSelect.innerHTML = "<option>No hay campos</option>";
+      }
+    });
+
+    function subscribeToCategories() {
+      const user = auth.currentUser;
+      if (!user) return;
+      const catCollectionRef = collection(db, "users", user.uid, "categories");
+      onSnapshotQuery(catCollectionRef, snapshot => {
+        categories = [];
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          categories.push({
+            id: docSnap.id,
+            name: data.name || "Sin nombre",
+            words: data.words || [],
+            wordFieldsOrder: data.wordFieldsOrder || []
+          });
+        });
+        renderCaratulaCards(); renderAllDropdowns();
       });
-      
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          loginStatus.textContent = `Logueado como: ${user.email}`;
-          btnLogout.style.display = "inline-block";
-          subscribeToCategories();
-        } else {
-          loginStatus.textContent = "No hay usuario logueado";
-          btnLogout.style.display = "none";
-          words = []; wordFields = []; wordFieldsOrder = []; globalHistory = [];
-          renderizarTabla(); generarFormularioDinamico([]); updateFieldsList();
-          const frontSelect = document.getElementById("frontField");
-          if (frontSelect) frontSelect.innerHTML = "<option>No hay campos</option>";
-        }
+    }
+
+    const caratulaCardsContainer = document.getElementById("caratulaCardsContainer");
+    function renderCaratulaCards() {
+      caratulaCardsContainer.innerHTML = "";
+      categories.forEach(cat => {
+        const card = document.createElement("div");
+        card.classList.add("caratula-card");
+        if (cat.id === currentCategoryId) { card.style.border = "2px solid #4caf50"; }
+        const title = document.createElement("h3");
+        title.textContent = cat.name;
+        card.appendChild(title);
+        const btnEditar = document.createElement("button");
+        btnEditar.textContent = "Editar Nombre";
+        btnEditar.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const nuevoNombre = prompt("Introduce el nuevo nombre para la carátula:", cat.name);
+          if (nuevoNombre && nuevoNombre.trim() !== "") { actualizarNombreCaratula(cat.id, nuevoNombre.trim()); }
+        });
+        card.appendChild(btnEditar);
+        const btnResetStats = document.createElement("button");
+        btnResetStats.textContent = "Reiniciar Stats";
+        btnResetStats.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (confirm(`¿Seguro que deseas reiniciar stats de "${cat.name}"?`)) { resetCategoryStats(cat.id); }
+        });
+        card.appendChild(btnResetStats);
+        const btnDelete = document.createElement("button");
+        btnDelete.textContent = "Eliminar Carátula";
+        btnDelete.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (confirm(`¿Eliminar carátula "${cat.name}" y todos sus datos?`)) { deleteCategory(cat.id); }
+        });
+        card.appendChild(btnDelete);
+        card.addEventListener("click", () => { selectCategoryById(cat.id); });
+        caratulaCardsContainer.appendChild(card);
       });
-      
-      // SUSCRIPCIÓN A LA LISTA DE CARÁTULAS
-      function subscribeToCategories() {
-        const user = auth.currentUser;
-        if (!user) return;
-        const catCollectionRef = collection(db, "users", user.uid, "categories");
-        onSnapshotQuery(catCollectionRef, snapshot => {
-          categories = [];
-          snapshot.forEach(docSnap => {
-            const data = docSnap.data();
-            categories.push({
-              id: docSnap.id,
-              name: data.name || "Sin nombre",
-              words: data.words || [],
-              wordFieldsOrder: data.wordFieldsOrder || []
-            });
-          });
-          renderCaratulaCards(); renderAllDropdowns();
-        });
+      const plusCard = document.createElement("div");
+      plusCard.classList.add("caratula-card", "caratula-create-card");
+      plusCard.textContent = "+";
+      plusCard.addEventListener("click", () => { document.getElementById("createCaratulaModal").style.display = "block"; });
+      caratulaCardsContainer.appendChild(plusCard);
+    }
+
+    async function actualizarNombreCaratula(catId, nuevoNombre) {
+      const user = auth.currentUser;
+      if (!user) return;
+      try {
+        const docRef = doc(db, "users", user.uid, "categories", catId);
+        await setDoc(docRef, { name: nuevoNombre }, { merge: true });
+        alert("Nombre de carátula actualizado.");
+      } catch (err) {
+        console.error("Error actualizando el nombre de la carátula:", err);
+        alert("Error actualizando el nombre. Revisa la consola.");
       }
-      
-      const caratulaCardsContainer = document.getElementById("caratulaCardsContainer");
-      function renderCaratulaCards() {
-        caratulaCardsContainer.innerHTML = "";
-        categories.forEach(cat => {
-          const card = document.createElement("div");
-          card.classList.add("caratula-card");
-          if (cat.id === currentCategoryId) { card.style.border = "2px solid #4caf50"; }
-          const title = document.createElement("h3");
-          title.textContent = cat.name;
-          card.appendChild(title);
-          const btnEditar = document.createElement("button");
-          btnEditar.textContent = "Editar Nombre";
-          btnEditar.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const nuevoNombre = prompt("Introduce el nuevo nombre para la carátula:", cat.name);
-            if (nuevoNombre && nuevoNombre.trim() !== "") { actualizarNombreCaratula(cat.id, nuevoNombre.trim()); }
-          });
-          card.appendChild(btnEditar);
-          const btnResetStats = document.createElement("button");
-          btnResetStats.textContent = "Reiniciar Stats";
-          btnResetStats.addEventListener("click", (e) => {
-            e.stopPropagation();
-            if (confirm(`¿Seguro que deseas reiniciar stats de "${cat.name}"?`)) { resetCategoryStats(cat.id); }
-          });
-          card.appendChild(btnResetStats);
-          const btnDelete = document.createElement("button");
-          btnDelete.textContent = "Eliminar Carátula";
-          btnDelete.addEventListener("click", (e) => {
-            e.stopPropagation();
-            if (confirm(`¿Eliminar carátula "${cat.name}" y todos sus datos?`)) { deleteCategory(cat.id); }
-          });
-          card.appendChild(btnDelete);
-          card.addEventListener("click", () => { selectCategoryById(cat.id); });
-          caratulaCardsContainer.appendChild(card);
-        });
-        const plusCard = document.createElement("div");
-        plusCard.classList.add("caratula-card", "caratula-create-card");
-        plusCard.textContent = "+";
-        plusCard.addEventListener("click", () => { document.getElementById("createCaratulaModal").style.display = "block"; });
-        caratulaCardsContainer.appendChild(plusCard);
+    }
+
+    const createCaratulaModal = document.getElementById("createCaratulaModal");
+    const closeCreateModal = document.getElementById("closeCreateModal");
+    const btnCrearCaratulaModal = document.getElementById("btnCrearCaratulaModal");
+    closeCreateModal.addEventListener("click", () => { createCaratulaModal.style.display = "none"; });
+    btnCrearCaratulaModal.addEventListener("click", createNewCategory);
+    async function createNewCategory() {
+      const user = auth.currentUser;
+      if (!user) return;
+      const nameInput = document.getElementById("newCaratulaName");
+      const name = nameInput.value.trim();
+      if (!name) { alert("Debes colocar un nombre de carátula."); return; }
+      nameInput.value = "";
+      createCaratulaModal.style.display = "none";
+      try {
+        await addDoc(collection(db, "users", user.uid, "categories"), { name, words: [], wordFieldsOrder: [] });
+        console.log(`Carátula "${name}" creada con éxito.`);
+      } catch(e) {
+        console.error("Error creando carátula:", e);
+        alert("Error creando carátula. Revisa la consola.");
       }
-      
-      async function actualizarNombreCaratula(catId, nuevoNombre) {
-        const user = auth.currentUser;
-        if (!user) return;
-        try {
-          const docRef = doc(db, "users", user.uid, "categories", catId);
-          await setDoc(docRef, { name: nuevoNombre }, { merge: true });
-          alert("Nombre de carátula actualizado.");
-        } catch (err) {
-          console.error("Error actualizando el nombre de la carátula:", err);
-          alert("Error actualizando el nombre. Revisa la consola.");
-        }
+    }
+
+    function selectCategoryById(catId) {
+      currentCategoryId = catId;
+      localStorage.setItem("currentCategoryId", catId);
+      loadCategoryData(); updateDropdownChecks(); updateAllDropdownsSelection();
+    }
+    function updateAllDropdownsSelection() {
+      const allSelectIds = [ "caratulaDropdownPracticar", "caratulaDropdownGestionar", "caratulaDropdownEstadisticas", "caratulaDropdownNuevas" ];
+      allSelectIds.forEach(selectId => {
+        const sel = document.getElementById(selectId);
+        if (sel) { sel.value = currentCategoryId; }
+      });
+      updateDropdownChecks();
+    }
+
+    let unsubGlobalHistory = null; 
+    function loadCategoryData() {
+      const cat = categories.find(c => c.id === currentCategoryId);
+      if (!cat) return;
+      words = cat.words.map(w => {
+        if (!w.id) w.id = Date.now() + Math.random().toString(16).slice(2);
+        w.failCount = w.failCount || 0; w.correctCount = w.correctCount || 0;
+        return w;
+      });
+      wordFieldsOrder = cat.wordFieldsOrder || [];
+      wordFields = [];
+      if (wordFieldsOrder.length > 0 && words.length > 0) {
+        wordFields = wordFieldsOrder.map(k => ({ key: k, label: k, type: "text", required: false }));
+      } else if (words.length > 0) {
+        const excluded = ["id","failCount","correctCount"];
+        const sample = words[0];
+        const keys = Object.keys(sample).filter(k => !excluded.includes(k));
+        wordFieldsOrder = keys;
+        wordFields = keys.map(k => ({ key: k, label: k, type: "text", required: false }));
       }
-      
-      const createCaratulaModal = document.getElementById("createCaratulaModal");
-      const closeCreateModal = document.getElementById("closeCreateModal");
-      const btnCrearCaratulaModal = document.getElementById("btnCrearCaratulaModal");
-      closeCreateModal.addEventListener("click", () => { createCaratulaModal.style.display = "none"; });
-      btnCrearCaratulaModal.addEventListener("click", createNewCategory);
-      async function createNewCategory() {
-        const user = auth.currentUser;
-        if (!user) return;
-        const nameInput = document.getElementById("newCaratulaName");
-        const name = nameInput.value.trim();
-        if (!name) { alert("Debes colocar un nombre de carátula."); return; }
-        nameInput.value = "";
-        createCaratulaModal.style.display = "none";
-        try {
-          await addDoc(collection(db, "users", user.uid, "categories"), { name, words: [], wordFieldsOrder: [] });
-          console.log(`Carátula "${name}" creada con éxito.`);
-        } catch(e) {
-          console.error("Error creando carátula:", e);
-          alert("Error creando carátula. Revisa la consola.");
-        }
-      }
-      
-      function selectCategoryById(catId) {
-        currentCategoryId = catId;
-        localStorage.setItem("currentCategoryId", catId);
-        loadCategoryData(); updateDropdownChecks(); updateAllDropdownsSelection();
-      }
-      function updateAllDropdownsSelection() {
-        const allSelectIds = [ "caratulaDropdownPracticar", "caratulaDropdownGestionar", "caratulaDropdownEstadisticas", "caratulaDropdownNuevas" ];
-        allSelectIds.forEach(selectId => {
-          const sel = document.getElementById(selectId);
-          if (sel) { sel.value = currentCategoryId; }
-        });
-        updateDropdownChecks();
-      }
-      
-      let unsubGlobalHistory = null; 
-      function loadCategoryData() {
-        const cat = categories.find(c => c.id === currentCategoryId);
-        if (!cat) return;
-        words = cat.words.map(w => {
-          if (!w.id) w.id = Date.now() + Math.random().toString(16).slice(2);
-          w.failCount = w.failCount || 0; w.correctCount = w.correctCount || 0;
-          return w;
-        });
-        wordFieldsOrder = cat.wordFieldsOrder || [];
-        wordFields = [];
-        if (wordFieldsOrder.length > 0 && words.length > 0) {
-          wordFields = wordFieldsOrder.map(k => ({ key: k, label: k, type: "text", required: false }));
-        } else if (words.length > 0) {
-          const excluded = ["id","failCount","correctCount"];
-          const sample = words[0];
-          const keys = Object.keys(sample).filter(k => !excluded.includes(k));
-          wordFieldsOrder = keys;
-          wordFields = keys.map(k => ({ key: k, label: k, type: "text", required: false }));
-        }
-        generarFormularioDinamico(wordFields);
-        updateFieldsList(); updateFrontFieldOptions(); currentPage = 1; renderizarTabla();
-        if (unsubGlobalHistory) unsubGlobalHistory();
-        unsubGlobalHistory = subscribeGlobalHistoryForCategory(currentCategoryId);
-        if (unsubPersonalizedLists) unsubPersonalizedLists();
-        unsubPersonalizedLists = subscribeToPersonalizedLists();
-        customPracticeList = [];
-        renderCustomPracticeGrid();
-        renderCustomPracticeResultsHeader();
-        renderCustomPracticeResultsBody(words);
-        currentIndex = 0; correctCount = 0; sessionPracticed = 0;
-        responses = []; currentStreak = 0; practiceSessionWords = [];
-      }
-      
-      function subscribeGlobalHistoryForCategory(catId) {
-        const user = auth.currentUser;
-        if (!user || !catId) return null;
-        const colRef = collection(db, "users", user.uid, "categories", catId, "globalHistory");
-        return onSnapshotQuery(colRef, (snapshot) => {
-          globalHistory = [];
-          snapshot.forEach(docSnap => { globalHistory.push(docSnap.data()); });
-          renderGlobalStats();
-        }, (err) => { console.error("Error en globalHistory:", err); });
-      }
-      
-      async function resetCategoryStats(catId) {
-        const cat = categories.find(c => c.id === catId);
-        if (!cat) return;
-        cat.words.forEach(w => { w.failCount = 0; w.correctCount = 0; });
-        const user = auth.currentUser;
-        if (!user) return;
-        try {
-          const docRef = doc(db, "users", user.uid, "categories", catId);
-          await setDoc(docRef, { words: cat.words }, { merge: true });
-          const colRef = collection(db, "users", user.uid, "categories", catId, "globalHistory");
-          const snap = await getDocs(colRef);
-          for (const d of snap.docs) { await deleteDoc(d.ref); }
-          alert(`Estadísticas reiniciadas para "${catId}".`);
-        } catch (e) {
-          console.error("Error reiniciando stats:", e);
-          alert("Error reiniciando stats. Revisa la consola.");
-        }
-      }
-      
-      async function deleteCategory(catId) {
-        const user = auth.currentUser;
-        if (!user) return;
+      generarFormularioDinamico(wordFields);
+      updateFieldsList(); updateFrontFieldOptions(); currentPage = 1; renderizarTabla();
+      if (unsubGlobalHistory) unsubGlobalHistory();
+      unsubGlobalHistory = subscribeGlobalHistoryForCategory(currentCategoryId);
+      if (unsubPersonalizedLists) unsubPersonalizedLists();
+      unsubPersonalizedLists = subscribeToPersonalizedLists();
+      customPracticeList = [];
+      renderCustomPracticeGrid();
+      renderCustomPracticeResultsHeader();
+      renderCustomPracticeResultsBody(words);
+      currentIndex = 0; correctCount = 0; sessionPracticed = 0;
+      responses = []; currentStreak = 0; practiceSessionWords = [];
+    }
+
+    function subscribeGlobalHistoryForCategory(catId) {
+      const user = auth.currentUser;
+      if (!user || !catId) return null;
+      const colRef = collection(db, "users", user.uid, "categories", catId, "globalHistory");
+      return onSnapshotQuery(colRef, (snapshot) => {
+        globalHistory = [];
+        snapshot.forEach(docSnap => { globalHistory.push(docSnap.data()); });
+        renderGlobalStats();
+      }, (err) => { console.error("Error en globalHistory:", err); });
+    }
+
+    async function resetCategoryStats(catId) {
+      const cat = categories.find(c => c.id === catId);
+      if (!cat) return;
+      cat.words.forEach(w => { w.failCount = 0; w.correctCount = 0; });
+      const user = auth.currentUser;
+      if (!user) return;
+      try {
+        const docRef = doc(db, "users", user.uid, "categories", catId);
+        await setDoc(docRef, { words: cat.words }, { merge: true });
         const colRef = collection(db, "users", user.uid, "categories", catId, "globalHistory");
         const snap = await getDocs(colRef);
         for (const d of snap.docs) { await deleteDoc(d.ref); }
-        const docRef = doc(db, "users", user.uid, "categories", catId);
-        await deleteDoc(docRef);
-        if (currentCategoryId === catId) {
-          currentCategoryId = "";
-          localStorage.removeItem("currentCategoryId");
-          words = []; wordFields = []; wordFieldsOrder = []; globalHistory = [];
-        }
-        alert("Carátula eliminada.");
+        alert(`Estadísticas reiniciadas para "${catId}".`);
+      } catch (e) {
+        console.error("Error reiniciando stats:", e);
+        alert("Error reiniciando stats. Revisa la consola.");
       }
-      
-      function renderAllDropdowns() {
-        const ddPracticar = document.getElementById("caratulaDropdownPracticar");
-        const ddGestionar = document.getElementById("caratulaDropdownGestionar");
-        const ddEstadisticas = document.getElementById("caratulaDropdownEstadisticas");
-        const ddNuevas = document.getElementById("caratulaDropdownNuevas");
-        const selects = [ddPracticar, ddGestionar, ddEstadisticas, ddNuevas].filter(Boolean);
-        selects.forEach(sel => {
-          sel.innerHTML = "";
-          categories.forEach(cat => {
-            const opt = document.createElement("option");
-            opt.value = cat.id;
-            opt.textContent = cat.name;
-            if (cat.id === currentCategoryId) { opt.selected = true; }
-            sel.appendChild(opt);
-          });
-          sel.addEventListener("change", e => { selectCategoryById(e.target.value); });
-          if (sel.options.length === 1) { sel.selectedIndex = 0; selectCategoryById(sel.value); }
-        });
-        updateDropdownChecks();
+    }
+
+    async function deleteCategory(catId) {
+      const user = auth.currentUser;
+      if (!user) return;
+      const colRef = collection(db, "users", user.uid, "categories", catId, "globalHistory");
+      const snap = await getDocs(colRef);
+      for (const d of snap.docs) { await deleteDoc(d.ref); }
+      const docRef = doc(db, "users", user.uid, "categories", catId);
+      await deleteDoc(docRef);
+      if (currentCategoryId === catId) {
+        currentCategoryId = "";
+        localStorage.removeItem("currentCategoryId");
+        words = []; wordFields = []; wordFieldsOrder = []; globalHistory = [];
       }
-      
-      function updateDropdownChecks() {
-        const allSelectIds = [ "caratulaDropdownPracticar", "caratulaDropdownGestionar", "caratulaDropdownEstadisticas", "caratulaDropdownNuevas" ];
-        allSelectIds.forEach(selectId => {
-          const sel = document.getElementById(selectId);
-          const checkEl = document.getElementById(selectId + "Check");
-          if (!sel || !checkEl) return;
-          checkEl.style.display = (sel.value === currentCategoryId && currentCategoryId !== "") ? "inline" : "none";
-        });
-      }
-      
-      document.getElementById("confirmCaratulaPracticar").addEventListener("click", () => {
-        const selectedCatId = document.getElementById("caratulaDropdownPracticar").value;
-        if (selectedCatId) { selectCategoryById(selectedCatId); }
-        else { alert("Por favor, selecciona una carátula."); }
-      });
-      document.getElementById("confirmCaratulaGestionar").addEventListener("click", () => {
-        const selectedCatId = document.getElementById("caratulaDropdownGestionar").value;
-        if (selectedCatId) { selectCategoryById(selectedCatId); }
-        else { alert("Por favor, selecciona una carátula."); }
-      });
-      document.getElementById("confirmCaratulaEstadisticas").addEventListener("click", () => {
-        const selectedCatId = document.getElementById("caratulaDropdownEstadisticas").value;
-        if (selectedCatId) { selectCategoryById(selectedCatId); }
-        else { alert("Por favor, selecciona una carátula."); }
-      });
-      document.getElementById("confirmCaratulaNuevas").addEventListener("click", () => {
-        const selectedCatId = document.getElementById("caratulaDropdownNuevas").value;
-        if (selectedCatId) { selectCategoryById(selectedCatId); }
-        else { alert("Por favor, selecciona una carátula."); }
-      });
-      
-      function updateFrontFieldOptions() {
-        const frontSelect = document.getElementById("frontField");
-        if (!frontSelect) return;
-        frontSelect.innerHTML = "";
-        if (wordFields.length > 0) {
-          wordFields.forEach(field => {
-            const opt = document.createElement("option");
-            opt.value = field.key;
-            opt.textContent = field.label;
-            frontSelect.appendChild(opt);
-          });
-        } else if (words.length > 0) {
-          Object.keys(words[0]).forEach(key => {
-            if (!["id","failCount","correctCount"].includes(key)) {
-              const opt = document.createElement("option");
-              opt.value = key;
-              opt.textContent = key;
-              frontSelect.appendChild(opt);
-            }
-          });
-        } else {
+      alert("Carátula eliminada.");
+    }
+
+    function renderAllDropdowns() {
+      const ddPracticar = document.getElementById("caratulaDropdownPracticar");
+      const ddGestionar = document.getElementById("caratulaDropdownGestionar");
+      const ddEstadisticas = document.getElementById("caratulaDropdownEstadisticas");
+      const ddNuevas = document.getElementById("caratulaDropdownNuevas");
+      const selects = [ddPracticar, ddGestionar, ddEstadisticas, ddNuevas].filter(Boolean);
+      selects.forEach(sel => {
+        sel.innerHTML = "";
+        categories.forEach(cat => {
           const opt = document.createElement("option");
-          opt.value = "";
-          opt.textContent = "No hay campos";
+          opt.value = cat.id;
+          opt.textContent = cat.name;
+          if (cat.id === currentCategoryId) { opt.selected = true; }
+          sel.appendChild(opt);
+        });
+        sel.addEventListener("change", e => { selectCategoryById(e.target.value); });
+        if (sel.options.length === 1) { sel.selectedIndex = 0; selectCategoryById(sel.value); }
+      });
+      updateDropdownChecks();
+    }
+
+    function updateDropdownChecks() {
+      const allSelectIds = [ "caratulaDropdownPracticar", "caratulaDropdownGestionar", "caratulaDropdownEstadisticas", "caratulaDropdownNuevas" ];
+      allSelectIds.forEach(selectId => {
+        const sel = document.getElementById(selectId);
+        const checkEl = document.getElementById(selectId + "Check");
+        if (!sel || !checkEl) return;
+        checkEl.style.display = (sel.value === currentCategoryId && currentCategoryId !== "") ? "inline" : "none";
+      });
+    }
+
+    document.getElementById("confirmCaratulaPracticar").addEventListener("click", () => {
+      const selectedCatId = document.getElementById("caratulaDropdownPracticar").value;
+      if (selectedCatId) { selectCategoryById(selectedCatId); }
+      else { alert("Por favor, selecciona una carátula."); }
+    });
+    document.getElementById("confirmCaratulaGestionar").addEventListener("click", () => {
+      const selectedCatId = document.getElementById("caratulaDropdownGestionar").value;
+      if (selectedCatId) { selectCategoryById(selectedCatId); }
+      else { alert("Por favor, selecciona una carátula."); }
+    });
+    document.getElementById("confirmCaratulaEstadisticas").addEventListener("click", () => {
+      const selectedCatId = document.getElementById("caratulaDropdownEstadisticas").value;
+      if (selectedCatId) { selectCategoryById(selectedCatId); }
+      else { alert("Por favor, selecciona una carátula."); }
+    });
+    document.getElementById("confirmCaratulaNuevas").addEventListener("click", () => {
+      const selectedCatId = document.getElementById("caratulaDropdownNuevas").value;
+      if (selectedCatId) { selectCategoryById(selectedCatId); }
+      else { alert("Por favor, selecciona una carátula."); }
+    });
+
+    function updateFrontFieldOptions() {
+      const frontSelect = document.getElementById("frontField");
+      if (!frontSelect) return;
+      frontSelect.innerHTML = "";
+      if (wordFields.length > 0) {
+        wordFields.forEach(field => {
+          const opt = document.createElement("option");
+          opt.value = field.key;
+          opt.textContent = field.label;
           frontSelect.appendChild(opt);
-        }
-      }
-      
-      function generarFormularioDinamico(fields) {
-        const form = document.getElementById("wordForm");
-        if (!form) return;
-        form.innerHTML = "";
-        if (fields.length === 0) {
-          form.innerHTML = "<p>No hay campos definidos. Importa un archivo o define tus campos manualmente.</p>";
-          return;
-        }
-        fields.forEach(field => {
-          const div = document.createElement("div");
-          const label = document.createElement("label");
-          label.textContent = field.label;
-          label.setAttribute("for", field.key);
-          div.appendChild(label);
-          let input;
-          if (field.type === "textarea") { input = document.createElement("textarea"); }
-          else { input = document.createElement("input"); input.type = field.type; }
-          input.id = field.key;
-          input.name = field.key;
-          input.placeholder = field.label;
-          if (field.required) input.required = true;
-          div.appendChild(input);
-          form.appendChild(div);
         });
-        const submitBtn = document.createElement("button");
-        submitBtn.textContent = "Agregar Palabra";
-        submitBtn.type = "submit";
-        form.appendChild(submitBtn);
-        const inputs = form.querySelectorAll("input, textarea");
-        inputs.forEach((input, index) => {
-          input.addEventListener("keydown", function(e) {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              if (index < inputs.length - 1) { inputs[index+1].focus(); }
-              else { submitBtn.click(); }
-            }
-          });
-        });
-      }
-      
-      function renderizarTabla() {
-        const tbody = document.querySelector("#wordsTable tbody");
-        const thead = document.querySelector("#wordsTable thead");
-        if (!tbody || !thead) return;
-        tbody.innerHTML = "";
-        thead.innerHTML = "";
-        if (wordFieldsOrder.length > 0) {
-          const headerRow = document.createElement("tr");
-          wordFieldsOrder.forEach(key => {
-            const field = wordFields.find(f => f.key === key);
-            if (field) {
-              const th = document.createElement("th");
-              th.textContent = field.label;
-              headerRow.appendChild(th);
-            }
-          });
-          const thAcciones = document.createElement("th");
-          thAcciones.textContent = "Acciones";
-          headerRow.appendChild(thAcciones);
-          thead.appendChild(headerRow);
-        }
-        const totalWords = words.length;
-        const totalPages = Math.ceil(totalWords / pageSize);
-        if (currentPage > totalPages) currentPage = totalPages < 1 ? 1 : totalPages;
-        if (currentPage < 1) currentPage = 1;
-        const start = (currentPage - 1) * pageSize;
-        const end = start + pageSize;
-        const wordsToRender = words.slice(start, end);
-        wordsToRender.forEach((word, idx) => {
-          const row = document.createElement("tr");
-          wordFieldsOrder.forEach(key => {
-            const td = document.createElement("td");
-            td.textContent = word[key] || "";
-            row.appendChild(td);
-          });
-          if (wordFieldsOrder.length > 0) {
-            const tdAcciones = document.createElement("td");
-            const btnEdit = document.createElement("button");
-            btnEdit.textContent = "Editar";
-            btnEdit.onclick = () => editarPalabra(start + idx);
-            const btnDelete = document.createElement("button");
-            btnDelete.textContent = "Borrar";
-            btnDelete.onclick = () => borrarPalabra(start + idx);
-            tdAcciones.appendChild(btnEdit);
-            tdAcciones.appendChild(btnDelete);
-            row.appendChild(tdAcciones);
+      } else if (words.length > 0) {
+        Object.keys(words[0]).forEach(key => {
+          if (!["id","failCount","correctCount"].includes(key)) {
+            const opt = document.createElement("option");
+            opt.value = key;
+            opt.textContent = key;
+            frontSelect.appendChild(opt);
           }
-          tbody.appendChild(row);
         });
-        const paginationInfo = document.getElementById("paginationInfo");
-        if (paginationInfo) { paginationInfo.textContent = `Página ${currentPage} de ${totalPages || 1}`; }
+      } else {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "No hay campos";
+        frontSelect.appendChild(opt);
       }
-      
-      document.getElementById("btnPrevPage").addEventListener("click", () => { currentPage--; renderizarTabla(); });
-      document.getElementById("btnNextPage").addEventListener("click", () => { currentPage++; renderizarTabla(); });
-      
-      document.getElementById("wordSearch").addEventListener("input", () => {
-        const term = document.getElementById("wordSearch").value.toLowerCase();
-        if (term === "") { currentPage = 1; renderizarTabla(); return; }
-        const filtered = words.map((word, index) => ({ word, index }))
-          .filter(item => wordFieldsOrder.some(key => String(item.word[key] || "").toLowerCase().includes(term)));
-        const tbody = document.querySelector("#wordsTable tbody");
-        const thead = document.querySelector("#wordsTable thead");
-        if (!tbody || !thead) return;
-        tbody.innerHTML = "";
-        thead.innerHTML = "";
-        if (wordFieldsOrder.length > 0) {
-          const headerRow = document.createElement("tr");
-          wordFieldsOrder.forEach(key => {
-            const field = wordFields.find(f => f.key === key);
-            if (field) {
-              const th = document.createElement("th");
-              th.textContent = field.label;
-              headerRow.appendChild(th);
-            }
-          });
-          const thAcciones = document.createElement("th");
-          thAcciones.textContent = "Acciones";
-          headerRow.appendChild(thAcciones);
-          thead.appendChild(headerRow);
-        }
-        filtered.forEach(item => {
-          const row = document.createElement("tr");
-          wordFieldsOrder.forEach(key => {
-            const td = document.createElement("td");
-            td.textContent = item.word[key] || "";
-            row.appendChild(td);
-          });
-          if (wordFieldsOrder.length > 0) {
-            const tdAcciones = document.createElement("td");
-            const btnEdit = document.createElement("button");
-            btnEdit.textContent = "Editar";
-            btnEdit.onclick = () => editarPalabra(item.index);
-            const btnDelete = document.createElement("button");
-            btnDelete.textContent = "Borrar";
-            btnDelete.onclick = () => borrarPalabra(item.index);
-            tdAcciones.appendChild(btnEdit);
-            tdAcciones.appendChild(btnDelete);
-            row.appendChild(tdAcciones);
-          }
-          tbody.appendChild(row);
-        });
-        const paginationInfo = document.getElementById("paginationInfo");
-        if (paginationInfo) { paginationInfo.textContent = `Mostrando ${filtered.length} resultado(s)`; }
+    }
+
+    function generarFormularioDinamico(fields) {
+      const form = document.getElementById("wordForm");
+      if (!form) return;
+      form.innerHTML = "";
+      if (fields.length === 0) {
+        form.innerHTML = "<p>No hay campos definidos. Importa un archivo o define tus campos manualmente.</p>";
+        return;
+      }
+      fields.forEach(field => {
+        const div = document.createElement("div");
+        const label = document.createElement("label");
+        label.textContent = field.label;
+        label.setAttribute("for", field.key);
+        div.appendChild(label);
+        let input;
+        if (field.type === "textarea") { input = document.createElement("textarea"); }
+        else { input = document.createElement("input"); input.type = field.type; }
+        input.id = field.key;
+        input.name = field.key;
+        input.placeholder = field.label;
+        if (field.required) input.required = true;
+        div.appendChild(input);
+        form.appendChild(div);
       });
-      
-      document.getElementById("wordForm").addEventListener("submit", function(e) {
-        e.preventDefault();
-        if (!currentCategoryId) { alert("Primero selecciona una carátula."); return; }
-        let nuevaPalabra = {};
-        wordFields.forEach(field => {
-          const input = document.getElementById(field.key);
-          nuevaPalabra[field.key] = input.value;
-          input.value = "";
+      const submitBtn = document.createElement("button");
+      submitBtn.textContent = "Agregar Palabra";
+      submitBtn.type = "submit";
+      form.appendChild(submitBtn);
+      const inputs = form.querySelectorAll("input, textarea");
+      inputs.forEach((input, index) => {
+        input.addEventListener("keydown", function(e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            if (index < inputs.length - 1) { inputs[index+1].focus(); }
+            else { submitBtn.click(); }
+          }
         });
-        nuevaPalabra.failCount = 0;
-        nuevaPalabra.correctCount = 0;
-        if (!nuevaPalabra.id) { nuevaPalabra.id = Date.now() + Math.random().toString(16).slice(2); }
-        words.push(nuevaPalabra);
+      });
+    }
+
+    function renderizarTabla() {
+      const tbody = document.querySelector("#wordsTable tbody");
+      const thead = document.querySelector("#wordsTable thead");
+      if (!tbody || !thead) return;
+      tbody.innerHTML = "";
+      thead.innerHTML = "";
+      if (wordFieldsOrder.length > 0) {
+        const headerRow = document.createElement("tr");
+        wordFieldsOrder.forEach(key => {
+          const field = wordFields.find(f => f.key === key);
+          if (field) {
+            const th = document.createElement("th");
+            th.textContent = field.label;
+            headerRow.appendChild(th);
+          }
+        });
+        const thAcciones = document.createElement("th");
+        thAcciones.textContent = "Acciones";
+        headerRow.appendChild(thAcciones);
+        thead.appendChild(headerRow);
+      }
+      const totalWords = words.length;
+      const totalPages = Math.ceil(totalWords / pageSize);
+      if (currentPage > totalPages) currentPage = totalPages < 1 ? 1 : totalPages;
+      if (currentPage < 1) currentPage = 1;
+      const start = (currentPage - 1) * pageSize;
+      const end = start + pageSize;
+      const wordsToRender = words.slice(start, end);
+      wordsToRender.forEach((word, idx) => {
+        const row = document.createElement("tr");
+        wordFieldsOrder.forEach(key => {
+          const td = document.createElement("td");
+          td.textContent = word[key] || "";
+          row.appendChild(td);
+        });
+        if (wordFieldsOrder.length > 0) {
+          const tdAcciones = document.createElement("td");
+          const btnEdit = document.createElement("button");
+          btnEdit.textContent = "Editar";
+          btnEdit.onclick = () => editarPalabra(start + idx);
+          const btnDelete = document.createElement("button");
+          btnDelete.textContent = "Borrar";
+          btnDelete.onclick = () => borrarPalabra(start + idx);
+          tdAcciones.appendChild(btnEdit);
+          tdAcciones.appendChild(btnDelete);
+          row.appendChild(tdAcciones);
+        }
+        tbody.appendChild(row);
+      });
+      const paginationInfo = document.getElementById("paginationInfo");
+      if (paginationInfo) { paginationInfo.textContent = `Página ${currentPage} de ${totalPages || 1}`; }
+    }
+
+    document.getElementById("btnPrevPage").addEventListener("click", () => { currentPage--; renderizarTabla(); });
+    document.getElementById("btnNextPage").addEventListener("click", () => { currentPage++; renderizarTabla(); });
+
+    document.getElementById("wordSearch").addEventListener("input", () => {
+      const term = document.getElementById("wordSearch").value.toLowerCase();
+      if (term === "") { currentPage = 1; renderizarTabla(); return; }
+      const filtered = words.map((word, index) => ({ word, index }))
+        .filter(item => wordFieldsOrder.some(key => String(item.word[key] || "").toLowerCase().includes(term)));
+      const tbody = document.querySelector("#wordsTable tbody");
+      const thead = document.querySelector("#wordsTable thead");
+      if (!tbody || !thead) return;
+      tbody.innerHTML = "";
+      thead.innerHTML = "";
+      if (wordFieldsOrder.length > 0) {
+        const headerRow = document.createElement("tr");
+        wordFieldsOrder.forEach(key => {
+          const field = wordFields.find(f => f.key === key);
+          if (field) {
+            const th = document.createElement("th");
+            th.textContent = field.label;
+            headerRow.appendChild(th);
+          }
+        });
+        const thAcciones = document.createElement("th");
+        thAcciones.textContent = "Acciones";
+        headerRow.appendChild(thAcciones);
+        thead.appendChild(headerRow);
+      }
+      filtered.forEach(item => {
+        const row = document.createElement("tr");
+        wordFieldsOrder.forEach(key => {
+          const td = document.createElement("td");
+          td.textContent = item.word[key] || "";
+          row.appendChild(td);
+        });
+        if (wordFieldsOrder.length > 0) {
+          const tdAcciones = document.createElement("td");
+          const btnEdit = document.createElement("button");
+          btnEdit.textContent = "Editar";
+          btnEdit.onclick = () => editarPalabra(item.index);
+          const btnDelete = document.createElement("button");
+          btnDelete.textContent = "Borrar";
+          btnDelete.onclick = () => borrarPalabra(item.index);
+          tdAcciones.appendChild(btnEdit);
+          tdAcciones.appendChild(btnDelete);
+          row.appendChild(tdAcciones);
+        }
+        tbody.appendChild(row);
+      });
+      const paginationInfo = document.getElementById("paginationInfo");
+      if (paginationInfo) { paginationInfo.textContent = `Mostrando ${filtered.length} resultado(s)`; }
+    });
+
+    document.getElementById("wordForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      if (!currentCategoryId) { alert("Primero selecciona una carátula."); return; }
+      let nuevaPalabra = {};
+      wordFields.forEach(field => {
+        const input = document.getElementById(field.key);
+        nuevaPalabra[field.key] = input.value;
+        input.value = "";
+      });
+      nuevaPalabra.failCount = 0;
+      nuevaPalabra.correctCount = 0;
+      if (!nuevaPalabra.id) { nuevaPalabra.id = Date.now() + Math.random().toString(16).slice(2); }
+      words.push(nuevaPalabra);
+      saveWords();
+      currentPage = Math.ceil(words.length / pageSize);
+      renderizarTabla();
+    });
+
+    window.editarPalabra = function(index) {
+      currentEditIndex = index;
+      const word = words[index];
+      const editDiv = document.getElementById("editFields");
+      editDiv.innerHTML = "";
+      wordFields.forEach(field => {
+        const div = document.createElement("div");
+        const label = document.createElement("label");
+        label.textContent = field.label;
+        label.setAttribute("for", "edit_" + field.key);
+        div.appendChild(label);
+        let input;
+        if (field.type === "textarea") { input = document.createElement("textarea"); }
+        else { input = document.createElement("input"); input.type = field.type; }
+        input.id = "edit_" + field.key;
+        input.name = field.key;
+        input.value = word[field.key] || "";
+        if (field.required) input.required = true;
+        div.appendChild(input);
+        editDiv.appendChild(div);
+      });
+      document.getElementById("editModal").style.display = "block";
+    };
+
+    window.borrarPalabra = function(index) {
+      if (confirm("¿Borrar esta palabra?")) {
+        words.splice(index, 1);
         saveWords();
-        currentPage = Math.ceil(words.length / pageSize);
         renderizarTabla();
+      }
+    };
+
+    document.getElementById("editWordForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (currentEditIndex === null) return;
+      wordFields.forEach(field => {
+        const input = document.getElementById("edit_" + field.key);
+        words[currentEditIndex][field.key] = input.value;
       });
-      
-      window.editarPalabra = function(index) {
-        currentEditIndex = index;
-        const word = words[index];
-        const editDiv = document.getElementById("editFields");
-        editDiv.innerHTML = "";
-        wordFields.forEach(field => {
-          const div = document.createElement("div");
-          const label = document.createElement("label");
-          label.textContent = field.label;
-          label.setAttribute("for", "edit_" + field.key);
-          div.appendChild(label);
-          let input;
-          if (field.type === "textarea") { input = document.createElement("textarea"); }
-          else { input = document.createElement("input"); input.type = field.type; }
-          input.id = "edit_" + field.key;
-          input.name = field.key;
-          input.value = word[field.key] || "";
-          if (field.required) input.required = true;
-          div.appendChild(input);
-          editDiv.appendChild(div);
+      if (!words[currentEditIndex].id) { words[currentEditIndex].id = Date.now() + Math.random().toString(16).slice(2); }
+      saveWords();
+      renderizarTabla();
+      document.getElementById("editModal").style.display = "none";
+      currentEditIndex = null;
+    });
+
+    document.getElementById("closeModal").addEventListener("click", () => {
+      document.getElementById("editModal").style.display = "none";
+      currentEditIndex = null;
+    });
+
+    function saveWords() {
+      if (!currentCategoryId) return;
+      const cat = categories.find(c => c.id === currentCategoryId);
+      if (!cat) return;
+      cat.words = words; 
+      cat.wordFieldsOrder = wordFieldsOrder; 
+      saveCategoryToFirestore(cat.id, cat.words, cat.wordFieldsOrder);
+    }
+
+    async function saveCategoryToFirestore(catId, wordsArray, fieldsOrder) {
+      const user = auth.currentUser;
+      if (!user || !catId) return;
+      try {
+        const docRef = doc(db, "users", user.uid, "categories", catId);
+        const sanitizedWords = wordsArray.map(w => {
+          const newWord = {};
+          for (let k in w) { newWord[k] = w[k] == undefined ? null : w[k]; }
+          return newWord;
         });
-        document.getElementById("editModal").style.display = "block";
-      };
-      
-      window.borrarPalabra = function(index) {
-        if (confirm("¿Borrar esta palabra?")) {
-          words.splice(index, 1);
-          saveWords();
+        await setDoc(docRef, { words: sanitizedWords, wordFieldsOrder: fieldsOrder }, { merge: true });
+      } catch (err) { console.error("Error guardando carátula:", err); }
+    }
+
+    function updateFieldsList() {
+      const fieldsList = document.getElementById("fieldsList");
+      if (!fieldsList) return;
+      fieldsList.innerHTML = "";
+      wordFields.forEach((field, index) => {
+        const li = document.createElement("li");
+        li.textContent = `${field.label} (${field.key}) - ${field.type} - ${field.required ? "Requerido" : "Opcional"}`;
+        li.setAttribute("draggable", "true");
+        li.setAttribute("data-index", index);
+        li.addEventListener("dragstart", handleDragStart);
+        li.addEventListener("dragover", handleDragOver);
+        li.addEventListener("drop", handleDrop);
+        const btnRemove = document.createElement("button");
+        btnRemove.textContent = "Eliminar";
+        btnRemove.onclick = () => {
+          wordFields.splice(index, 1);
+          wordFieldsOrder = wordFieldsOrder.filter(key => key !== field.key);
+          updateFieldsList();
+          generarFormularioDinamico(wordFields);
+          updateFrontFieldOptions();
           renderizarTabla();
+          saveWords();
+        };
+        li.appendChild(btnRemove);
+        fieldsList.appendChild(li);
+      });
+    }
+    function handleDragStart(e) {
+      draggedIndex = parseInt(e.target.getAttribute("data-index"));
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", draggedIndex);
+    }
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+    }
+    function handleDrop(e) {
+      e.preventDefault();
+      const targetIndex = parseInt(e.target.getAttribute("data-index"));
+      if (draggedIndex === null || targetIndex === draggedIndex) return;
+      const [movedField] = wordFieldsOrder.splice(draggedIndex, 1);
+      wordFieldsOrder.splice(targetIndex, 0, movedField);
+      wordFields = wordFieldsOrder.map(k => wordFields.find(f => f.key === k));
+      updateFieldsList();
+      renderizarTabla();
+      saveWords();
+      draggedIndex = null;
+    }
+    document.getElementById("saveFieldsOrder").addEventListener("click", () => {
+      saveWords();
+      alert("Orden de campos guardado.");
+    });
+    document.getElementById("fieldsForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      if (!currentCategoryId) { alert("Primero selecciona una carátula."); return; }
+      const key = document.getElementById("fieldKey").value.trim();
+      const label = document.getElementById("fieldLabel").value.trim();
+      const type = document.getElementById("fieldType").value;
+      const required = document.getElementById("fieldRequired").checked;
+      if (key === "" || label === "") { alert("Por favor, ingresa todos los datos."); return; }
+      if (key.indexOf(" ") >= 0) { alert("La clave no debe contener espacios."); return; }
+      if (wordFields.some(f => f.key === key)) { alert("Ya existe un campo con esa clave."); return; }
+      const newField = { key, label, type, required };
+      wordFields.push(newField);
+      wordFieldsOrder.push(key);
+      updateFieldsList();
+      generarFormularioDinamico(wordFields);
+      updateFrontFieldOptions();
+      renderizarTabla();
+      saveWords();
+      document.getElementById("fieldsForm").reset();
+    });
+
+    // EVENTO PARA GUARDAR LISTA PERSONALIZADA
+    document.getElementById("btnSaveList").addEventListener("click", () => {
+      const name = document.getElementById("listNameInput").value.trim();
+      if (!name) { alert("Ingresa un nombre para la lista."); return; }
+      if (customPracticeList.length === 0) { alert("La lista está vacía."); return; }
+      const wordIds = customPracticeList.map(w => w.id);
+      savePersonalizedList(name, wordIds);
+      document.getElementById("listNameInput").value = "";
+    });
+
+    window.exportData = function() {
+      const dataStr = JSON.stringify(words, null, 2);
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "palabras.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    document.getElementById("exportData").addEventListener("click", window.exportData);
+    document.getElementById("importData").addEventListener("change", (e) => { fileToImport = e.target.files[0] || null; });
+    document.getElementById("confirmUpload").addEventListener("click", async () => {
+      if (!fileToImport) { alert("No se ha seleccionado ningún archivo para importar."); return; }
+      const uploadProgressContainer = document.getElementById("uploadProgressContainer");
+      const uploadProgressBar = document.getElementById("uploadProgressBar");
+      uploadProgressContainer.style.display = "block";
+      uploadProgressBar.style.width = "0%";
+      const fileName = fileToImport.name.toLowerCase();
+      const reader = new FileReader();
+      reader.onprogress = function(evt) {
+        if (evt.lengthComputable) {
+          const percentLoaded = Math.round((evt.loaded / evt.total) * 100);
+          uploadProgressBar.style.width = percentLoaded + "%";
         }
       };
-      
-      document.getElementById("editWordForm").addEventListener("submit", (e) => {
-        e.preventDefault();
-        if (currentEditIndex === null) return;
-        wordFields.forEach(field => {
-          const input = document.getElementById("edit_" + field.key);
-          words[currentEditIndex][field.key] = input.value;
+      reader.onload = function(evt) {
+        uploadProgressBar.style.width = "100%";
+        setTimeout(() => { uploadProgressContainer.style.display = "none"; }, 500);
+        const data = evt.target.result;
+        if (fileName.endsWith(".json")) {
+          try { const jsonContent = JSON.parse(data); importarDatosLeidos(jsonContent); }
+          catch (err) { alert("Error parsing JSON: " + err); }
+        } else if (fileName.endsWith(".csv")) {
+          Papa.parse(data, { header: true, complete: function(results) { importarDatosLeidos(results.data); } });
+        } else if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) {
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const sheetData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+          importarDatosLeidos(sheetData);
+        } else { alert("Formato de archivo no soportado. Usa .json, .csv, .xls o .xlsx"); }
+      };
+      if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) { reader.readAsArrayBuffer(fileToImport); }
+      else { reader.readAsText(fileToImport); }
+    });
+    document.getElementById("appendData").addEventListener("click", () => { document.getElementById("appendFile").click(); });
+    document.getElementById("appendFile").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const fileName = file.name.toLowerCase();
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const data = evt.target.result;
+        if (fileName.endsWith(".json")) {
+          try { const jsonContent = JSON.parse(data); fusionarDatos(jsonContent); }
+          catch (err) { alert("Error parsing JSON: " + err); }
+        } else if (fileName.endsWith(".csv")) {
+          Papa.parse(data, { header: true, complete: function(results) { fusionarDatos(results.data); } });
+        } else if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) {
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const sheetData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+          fusionarDatos(sheetData);
+        } else { alert("Formato de archivo no soportado."); }
+      };
+      if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) { reader.readAsArrayBuffer(file); }
+      else { reader.readAsText(file); }
+    });
+    function importarDatosLeidos(importArray) {
+      if (!Array.isArray(importArray)) { alert("El archivo no contiene un array de datos válido."); return; }
+      words = importArray.map(obj => ({
+        ...obj,
+        id: obj.id || (Date.now() + Math.random().toString(16).slice(2)),
+        failCount: obj.failCount || 0,
+        correctCount: obj.correctCount || 0
+      }));
+      if (words.length > 0 && wordFieldsOrder.length === 0) {
+        const excluded = ["id","failCount","correctCount"];
+        const sample = words[0];
+        const keys = Object.keys(sample).filter(k => !excluded.includes(k));
+        wordFieldsOrder = keys;
+        wordFields = keys.map(k => ({ key: k, label: k, type: "text", required: false }));
+      }
+      saveWords(); renderizarTabla(); generarFormularioDinamico(wordFields);
+      updateFieldsList(); updateFrontFieldOptions();
+      alert("Datos importados correctamente.");
+    }
+    function fusionarDatos(importArray) {
+      if (!Array.isArray(importArray)) { alert("El archivo no contiene un array de datos válido."); return; }
+      importArray.forEach(obj => {
+        const existingIndex = words.findIndex(w => w.id === obj.id);
+        if (existingIndex >= 0) {
+          words[existingIndex] = { ...words[existingIndex], ...obj, failCount: obj.failCount || 0, correctCount: obj.correctCount || 0 };
+        } else {
+          words.push({ ...obj, id: obj.id || (Date.now() + Math.random().toString(16).slice(2)), failCount: obj.failCount || 0, correctCount: obj.correctCount || 0 });
+        }
+      });
+      if (words.length > 0 && wordFieldsOrder.length === 0) {
+        const excluded = ["id","failCount","correctCount"];
+        const sample = words[0];
+        const keys = Object.keys(sample).filter(k => !excluded.includes(k));
+        wordFieldsOrder = keys;
+        wordFields = keys.map(k => ({ key: k, label: k, type: "text", required: false }));
+      }
+      saveWords(); renderizarTabla(); generarFormularioDinamico(wordFields);
+      updateFieldsList(); updateFrontFieldOptions();
+      alert("Datos fusionados correctamente.");
+    }
+
+    const btnStartPractice = document.getElementById("startPractice");
+    const flashcardDiv = document.getElementById("flashcard");
+    const detailsDiv = document.getElementById("details");
+    const btnMostrar = document.getElementById("btnMostrar");
+    const btnBien = document.getElementById("btnBien");
+    const btnMal = document.getElementById("btnMal");
+    const btnFinishSession = document.getElementById("finishSession");
+    const btnResetSession = document.getElementById("resetSession");
+    const progressBar = document.getElementById("progressBar");
+    const progressCount = document.getElementById("progressCount");
+
+    btnStartPractice.addEventListener("click", async () => {
+      if (!currentCategoryId) { alert("Primero selecciona una carátula."); return; }
+      await startPracticeSession();
+    });
+
+    async function startPracticeSession() {
+      const mode = document.getElementById("practiceMode").value;
+      if (mode === "dificultad") { await syncStatsWithGlobalHistory(); }
+      currentIndex = 0; correctCount = 0; sessionPracticed = 0; responses = []; currentStreak = 0;
+      updateProgress();
+      if (mode === "normal") { weightedMode = false; practiceSessionWords = [...words]; }
+      else if (mode === "aleatorio") { weightedMode = false; practiceSessionWords = shuffleArray([...words]); }
+      else if (mode === "dificultad") {
+        weightedMode = true;
+        let filtered = words.filter(card => {
+          let grade = obtenerCalificacion(card);
+          return grade === "C" || grade === "D" || grade === "F";
         });
-        if (!words[currentEditIndex].id) { words[currentEditIndex].id = Date.now() + Math.random().toString(16).slice(2); }
-        saveWords();
-        renderizarTabla();
-        document.getElementById("editModal").style.display = "none";
-        currentEditIndex = null;
-      });
-      
-      document.getElementById("closeModal").addEventListener("click", () => {
-        document.getElementById("editModal").style.display = "none";
-        currentEditIndex = null;
-      });
-      
-      function saveWords() {
-        if (!currentCategoryId) return;
-        const cat = categories.find(c => c.id === currentCategoryId);
-        if (!cat) return;
-        cat.words = words; 
-        cat.wordFieldsOrder = wordFieldsOrder; 
-        saveCategoryToFirestore(cat.id, cat.words, cat.wordFieldsOrder);
+        if (filtered.length === 0) { alert("No hay tarjetas para repasar."); return; }
+        practiceSessionWords = weightedShuffle(filtered);
       }
-      
-      async function saveCategoryToFirestore(catId, wordsArray, fieldsOrder) {
-        const user = auth.currentUser;
-        if (!user || !catId) return;
-        try {
-          const docRef = doc(db, "users", user.uid, "categories", catId);
-          const sanitizedWords = wordsArray.map(w => {
-            const newWord = {};
-            for (let k in w) { newWord[k] = w[k] == undefined ? null : w[k]; }
-            return newWord;
-          });
-          await setDoc(docRef, { words: sanitizedWords, wordFieldsOrder: fieldsOrder }, { merge: true });
-        } catch (err) { console.error("Error guardando carátula:", err); }
+      showCard();
+    }
+
+    function updateProgress() {
+      if (practiceSessionWords.length > 0) {
+        let pct = (currentIndex / practiceSessionWords.length) * 100;
+        progressBar.style.width = `${pct}%`;
+        progressCount.textContent = `Progreso: ${currentIndex} / ${practiceSessionWords.length}`;
+      } else { progressBar.style.width = "0%"; progressCount.textContent = ""; }
+    }
+
+    function showCard() {
+      updateProgress();
+      if (currentIndex >= practiceSessionWords.length) { return; }
+      btnBien.style.border = ""; btnMal.style.border = "";
+      const card = practiceSessionWords[currentIndex];
+      const frontField = document.getElementById("frontField").value;
+      flashcardDiv.style.borderLeft = "10px solid " + obtenerColor(card);
+      flashcardDiv.style.borderRight = "10px solid " + obtenerColor(card);
+      flashcardDiv.style.borderTop = "4px solid transparent";
+      flashcardDiv.style.borderBottom = "4px solid transparent";
+      flashcardDiv.textContent = card[frontField] || "?";
+      if (responses[currentIndex]) {
+        detailsDiv.innerHTML = renderCardDetails(card, frontField);
+        detailsDiv.classList.remove("hidden");
+        btnMostrar.classList.add("hidden");
+        btnBien.classList.add("hidden");
+        btnMal.classList.add("hidden");
+      } else {
+        detailsDiv.classList.add("hidden");
+        btnMostrar.classList.remove("hidden");
+        btnBien.classList.add("hidden");
+        btnMal.classList.add("hidden");
       }
-      
-      function updateFieldsList() {
-        const fieldsList = document.getElementById("fieldsList");
-        if (!fieldsList) return;
-        fieldsList.innerHTML = "";
-        wordFields.forEach((field, index) => {
-          const li = document.createElement("li");
-          li.textContent = `${field.label} (${field.key}) - ${field.type} - ${field.required ? "Requerido" : "Opcional"}`;
-          li.setAttribute("draggable", "true");
-          li.setAttribute("data-index", index);
-          li.addEventListener("dragstart", handleDragStart);
-          li.addEventListener("dragover", handleDragOver);
-          li.addEventListener("drop", handleDrop);
-          const btnRemove = document.createElement("button");
-          btnRemove.textContent = "Eliminar";
-          btnRemove.onclick = () => {
-            wordFields.splice(index, 1);
-            wordFieldsOrder = wordFieldsOrder.filter(key => key !== field.key);
-            updateFieldsList();
-            generarFormularioDinamico(wordFields);
-            updateFrontFieldOptions();
-            renderizarTabla();
-            saveWords();
-          };
-          li.appendChild(btnRemove);
-          fieldsList.appendChild(li);
-        });
+    }
+
+    btnMostrar.addEventListener("click", () => {
+      if (currentIndex < practiceSessionWords.length) {
+        const card = practiceSessionWords[currentIndex];
+        const frontField = document.getElementById("frontField").value;
+        detailsDiv.innerHTML = renderCardDetails(card, frontField);
+        detailsDiv.classList.remove("hidden");
+        btnMostrar.classList.add("hidden");
+        btnBien.classList.remove("hidden");
+        btnMal.classList.remove("hidden");
       }
-      function handleDragStart(e) {
-        draggedIndex = parseInt(e.target.getAttribute("data-index"));
-        e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/plain", draggedIndex);
+    });
+
+    async function responder(correcto) {
+      if (currentIndex >= practiceSessionWords.length) return;
+      if (responses[currentIndex]) return;
+      const card = practiceSessionWords[currentIndex];
+      const frontField = document.getElementById("frontField").value;
+      detailsDiv.innerHTML = renderCardDetails(card, frontField);
+      detailsDiv.classList.remove("hidden");
+      sessionPracticed++;
+      let respText = "";
+      if (correcto) {
+        correctCount++; respText = "Correcto"; responses[currentIndex] = "Correcto";
+        flashcardDiv.style.borderTop = "4px solid green"; flashcardDiv.style.borderBottom = "4px solid green";
+        btnBien.style.border = "2px solid green"; currentStreak++;
+        card.correctCount = (card.correctCount || 0) + 1;
+      } else {
+        respText = "Incorrecto"; card.failCount = (card.failCount || 0) + 1;
+        responses[currentIndex] = "Incorrecto"; flashcardDiv.style.borderTop = "4px solid red";
+        flashcardDiv.style.borderBottom = "4px solid red"; btnMal.style.border = "2px solid red";
+        currentStreak = 0;
       }
-      function handleDragOver(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
-      }
-      function handleDrop(e) {
-        e.preventDefault();
-        const targetIndex = parseInt(e.target.getAttribute("data-index"));
-        if (draggedIndex === null || targetIndex === draggedIndex) return;
-        const [movedField] = wordFieldsOrder.splice(draggedIndex, 1);
-        wordFieldsOrder.splice(targetIndex, 0, movedField);
-        wordFields = wordFieldsOrder.map(k => wordFields.find(f => f.key === k));
-        updateFieldsList();
-        renderizarTabla();
-        saveWords();
-        draggedIndex = null;
-      }
-      document.getElementById("saveFieldsOrder").addEventListener("click", () => {
-        saveWords();
-        alert("Orden de campos guardado.");
-      });
-      document.getElementById("fieldsForm").addEventListener("submit", function(e) {
-        e.preventDefault();
-        if (!currentCategoryId) { alert("Primero selecciona una carátula."); return; }
-        const key = document.getElementById("fieldKey").value.trim();
-        const label = document.getElementById("fieldLabel").value.trim();
-        const type = document.getElementById("fieldType").value;
-        const required = document.getElementById("fieldRequired").checked;
-        if (key === "" || label === "") { alert("Por favor, ingresa todos los datos."); return; }
-        if (key.indexOf(" ") >= 0) { alert("La clave no debe contener espacios."); return; }
-        if (wordFields.some(f => f.key === key)) { alert("Ya existe un campo con esa clave."); return; }
-        const newField = { key, label, type, required };
-        wordFields.push(newField);
-        wordFieldsOrder.push(key);
-        updateFieldsList();
-        generarFormularioDinamico(wordFields);
-        updateFrontFieldOptions();
-        renderizarTabla();
-        saveWords();
-        document.getElementById("fieldsForm").reset();
-      });
-      
-      // EVENTO PARA GUARDAR LISTA PERSONALIZADA
-      document.getElementById("btnSaveList").addEventListener("click", () => {
-        const name = document.getElementById("listNameInput").value.trim();
-        if (!name) { alert("Ingresa un nombre para la lista."); return; }
-        if (customPracticeList.length === 0) { alert("La lista está vacía."); return; }
-        const wordIds = customPracticeList.map(w => w.id);
-        savePersonalizedList(name, wordIds);
-        document.getElementById("listNameInput").value = "";
-      });
-      
-      startCustomPracticeBtn.addEventListener("click", () => {
-        if (customPracticeList.length === 0) { alert("No hay palabras seleccionadas para la práctica personalizada."); return; }
-        startCustomPracticeSession();
-      });
-      
-      async function startCustomPracticeSession() {
-        currentIndex = 0; correctCount = 0; sessionPracticed = 0; responses = []; currentStreak = 0;
-        weightedMode = false; practiceSessionWords = [...customPracticeList];
-        alert("¡Práctica personalizada iniciada! Ve a la sección 'Practicar' para usarla.");
-        showSection("sectionPracticar"); showCard();
-      }
-      
-      function startFocusModeSession() {
-        if (customPracticeList.length < settings.focusTestSize) {
-          alert("Necesitas al menos " + settings.focusTestSize + " palabras para Focus Mode.");
+      if (!card.id) { card.id = Date.now() + Math.random().toString(16).slice(2); }
+      addGlobalHistoryEntry(card, card[frontField], respText)
+        .then(() => console.log("Historial guardado"))
+        .catch(err => console.error("Error en addGlobalHistoryEntry:", err));
+      saveWords();
+      setTimeout(() => { flashcardDiv.style.borderTop = "4px solid transparent"; flashcardDiv.style.borderBottom = "4px solid transparent"; currentIndex++; showCard(); }, settings.feedbackDelay);
+    }
+
+    btnBien.addEventListener("click", () => responder(true));
+    btnMal.addEventListener("click", () => responder(false));
+
+    document.addEventListener("keydown", (e) => {
+      if (document.getElementById("focusModeModal").style.display === "block") {
+        const focusBtnMostrar = document.getElementById("focusBtnMostrar");
+        const focusBtnBien = document.getElementById("focusBtnBien");
+        const focusBtnMal = document.getElementById("focusBtnMal");
+        if (!focusBtnMostrar.classList.contains("hidden") && e.key === settings.keyMostrar) {
+          focusBtnMostrar.click();
           return;
         }
-        focusCards = customPracticeList.slice(0, settings.focusTestSize);
-        focusBlockIndex = 0; focusPhase = "memorization"; focusCurrentIndex = 0;
-        settings.focusBlockSize = parseInt(document.getElementById("focusBlockSize").value);
-        settings.focusTestSize = parseInt(document.getElementById("focusTestSize").value);
-        openFocusModal();
-        runMemorizationPhase();
-      }
-      
-      function runMemorizationPhase() {
-        document.getElementById("focusPhaseTitle").textContent = "Memorización - Bloque " + (focusBlockIndex + 1);
-        focusPhase = "memorization"; focusCurrentIndex = 0;
-        showFocusCard();
-      }
-      
-      function runTestPhase() {
-        document.getElementById("focusPhaseTitle").textContent = "Test - Bloque " + (focusBlockIndex + 1);
-        focusPhase = "test"; focusCurrentIndex = 0;
-        showFocusCard();
-      }
-      
-      function runFinalTestPhase() {
-        document.getElementById("focusPhaseTitle").textContent = "Test Final - Todas las Palabras";
-        focusPhase = "finalTest"; focusCurrentIndex = 0;
-        showFocusCard();
-      }
-      
-      function showFocusCard() {
-        updateFocusProgress();
-        let card;
-        if (focusPhase === "memorization" || focusPhase === "test") {
-          let blockStart = focusBlockIndex * settings.focusBlockSize;
-          let currentBlock = focusCards.slice(blockStart, blockStart + settings.focusBlockSize);
-          if (focusCurrentIndex >= currentBlock.length) {
-            if (focusPhase === "memorization") { runTestPhase(); return; }
-            else if (focusPhase === "test") {
-              focusBlockIndex++;
-              if (focusBlockIndex * settings.focusBlockSize < focusCards.length) { runMemorizationPhase(); }
-              else { runFinalTestPhase(); }
-              return;
-            }
-          } else { card = currentBlock[focusCurrentIndex]; }
-        } else if (focusPhase === "finalTest") {
-          if (focusCurrentIndex >= focusCards.length) { alert("¡Focus Mode completado!"); closeFocusModal(); return; }
-          else { card = focusCards[focusCurrentIndex]; }
+        if (!focusBtnBien.classList.contains("hidden") && e.key === settings.keyCorrect) {
+          focusBtnBien.click();
+          return;
         }
-        let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : (wordFieldsOrder[0] || "");
-        let flashcard = document.getElementById("focusFlashcard");
-        flashcard.style.borderLeft = "10px solid " + obtenerColor(card);
-        flashcard.style.borderRight = "10px solid " + obtenerColor(card);
-        flashcard.style.borderTop = "4px solid transparent";
-        flashcard.style.borderBottom = "4px solid transparent";
-        flashcard.textContent = card[frontField] || "?";
-        if (focusPhase === "memorization") {
-          document.getElementById("focusDetails").innerHTML = renderCardDetails(card, frontField);
-          document.getElementById("focusDetails").classList.remove("hidden");
-          document.getElementById("btnConfirmMemorization").classList.remove("hidden");
-          document.getElementById("focusBtnMostrar").classList.add("hidden");
-          document.getElementById("focusBtnBien").classList.add("hidden");
-          document.getElementById("focusBtnMal").classList.add("hidden");
-        } else {
-          document.getElementById("focusDetails").classList.add("hidden");
-          document.getElementById("btnConfirmMemorization").classList.add("hidden");
-          document.getElementById("focusBtnMostrar").classList.remove("hidden");
-          document.getElementById("focusBtnBien").classList.add("hidden");
-          document.getElementById("focusBtnMal").classList.add("hidden");
+        if (!focusBtnMal.classList.contains("hidden") && e.key === settings.keyIncorrect) {
+          focusBtnMal.click();
+          return;
+        }
+      } else if (document.getElementById("sectionPracticar").classList.contains("active")) {
+        if (!responses[currentIndex] && !btnMostrar.classList.contains("hidden")) {
+          if (e.key === settings.keyMostrar) { btnMostrar.click(); return; }
+        }
+        if (!responses[currentIndex] && !btnBien.classList.contains("hidden")) {
+          if (e.key === settings.keyCorrect) responder(true);
+          if (e.key === settings.keyIncorrect) responder(false);
         }
       }
-      
-      function updateFocusProgress() {
-        let total = (focusPhase === "finalTest") ? focusCards.length : settings.focusBlockSize;
-        let pct = (focusCurrentIndex / total) * 100;
-        document.getElementById("focusProgressBar").style.width = pct + "%";
-        document.getElementById("focusProgressCount").textContent = `Progreso: ${focusCurrentIndex} / ${total}`;
+    });
+
+    btnFinishSession.addEventListener("click", () => {
+      let sessionData = {
+        date: new Date().toISOString(),
+        total: sessionPracticed,
+        correct: correctCount,
+        incorrect: sessionPracticed - correctCount,
+        percentage: sessionPracticed ? ((correctCount / sessionPracticed) * 100).toFixed(2) : "0"
+      };
+      let history = JSON.parse(localStorage.getItem("sessionHistory")) || [];
+      history.push(sessionData);
+      localStorage.setItem("sessionHistory", JSON.stringify(history));
+      practiceSessionWords = []; currentIndex = 0; correctCount = 0;
+      sessionPracticed = 0; responses = []; currentStreak = 0;
+      alert("Sesión finalizada.");
+      showSection("sectionPracticar");
+    });
+
+    btnResetSession.addEventListener("click", () => {
+      currentIndex = 0; correctCount = 0; sessionPracticed = 0;
+      responses = []; currentStreak = 0;
+      flashcardDiv.classList.remove("hidden");
+      updateProgress(); showCard();
+    });
+
+    flashcardDiv.addEventListener("click", () => {
+      if (currentIndex < practiceSessionWords.length && settings.audioEnabled) {
+        const card = practiceSessionWords[currentIndex];
+        speak(card.pinyin);
       }
-      
-      document.getElementById("btnConfirmMemorization").addEventListener("click", () => {
-        if (focusPhase === "memorization") {
-          focusCurrentIndex++;
-          let blockSize = settings.focusBlockSize;
-          if (focusCurrentIndex >= blockSize) { runTestPhase(); }
-          else { showFocusCard(); }
+    });
+
+    async function addGlobalHistoryEntry(card, frontValue, respText) {
+      const user = auth.currentUser;
+      if (!user || !currentCategoryId) return;
+      try {
+        await addDoc(collection(db, "users", user.uid, "categories", currentCategoryId, "globalHistory"), {
+          date: new Date().toISOString(), id: card.id,
+          campoFrontal: frontValue, pinyin: card.pinyin || "",
+          respuesta: respText
+        });
+      } catch (e) { console.error("Error en globalHistory:", e); }
+    }
+
+    async function syncStatsWithGlobalHistory() { }
+
+    function obtenerColor(obj) {
+      const fallos = obj.failCount || 0, aciertos = obj.correctCount || 0, total = fallos + aciertos;
+      if (total === 0) return "#FFFFFF";
+      const porcentajeAciertos = (aciertos / total) * 100;
+      if (porcentajeAciertos >= 90) return "#4CAF50";
+      else if (porcentajeAciertos >= 80) return "#8BC34A";
+      else if (porcentajeAciertos >= 70) return "#FFEB3B";
+      else if (porcentajeAciertos >= 60) return "#FF9800";
+      else return "#F44336";
+    }
+    function obtenerCalificacion(obj) {
+      const fallos = obj.failCount || 0, aciertos = obj.correctCount || 0, total = fallos + aciertos;
+      if (total === 0) return "-";
+      const porcentajeAciertos = (aciertos / total) * 100;
+      if (porcentajeAciertos >= 90) return "A";
+      else if (porcentajeAciertos >= 80) return "B";
+      else if (porcentajeAciertos >= 70) return "C";
+      else if (porcentajeAciertos >= 60) return "D";
+      else return "F";
+    }
+    function renderGlobalStats() {
+      if (!globalHistory || globalHistory.length === 0) {
+        const globalStatsEl = document.getElementById("globalStats");
+        if (globalStatsEl) { globalStatsEl.textContent = "No hay estadísticas globales disponibles para esta carátula."; }
+        const failTableBody = document.querySelector("#failTable tbody");
+        if (failTableBody) failTableBody.innerHTML = "";
+        return;
+      }
+      let statsMap = {};
+      globalHistory.forEach(entry => {
+        const id = entry.id;
+        if (!statsMap[id]) { statsMap[id] = { id, campoFrontal: entry.campoFrontal, failCount: 0, correctCount: 0 }; }
+        if (entry.respuesta === "Incorrecto") { statsMap[id].failCount++; }
+        else if (entry.respuesta === "Correcto") { statsMap[id].correctCount++; }
+      });
+      let statsArray = Object.values(statsMap);
+      statsArray.forEach(obj => {
+        obj.total = obj.failCount + obj.correctCount;
+        obj.accuracy = obj.total > 0 ? ((obj.correctCount / obj.total) * 100).toFixed(2) + "%" : "0%";
+      });
+      statsArray.sort((a, b) => {
+        let diff = 0;
+        if (a[currentSortField] < b[currentSortField]) diff = -1;
+        else if (a[currentSortField] > b[currentSortField]) diff = 1;
+        return currentSortOrder === 'asc' ? diff : -diff;
+      });
+      const globalStatsEl = document.getElementById("globalStats");
+      if (globalStatsEl) { globalStatsEl.textContent = `Total de palabras: ${words.length}`; }
+      const tbody = document.querySelector("#failTable tbody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      statsArray.forEach(obj => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${obj.campoFrontal}</td>
+          <td>${obj.total}</td>
+          <td style="background-color: ${obtenerColor(obj)}">${obj.accuracy}</td>
+          <td><button onclick="resetStatsForWord('${obj.id}')">Resetear</button></td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    window.resetStatsForWord = async function(wordId) {
+      if (!currentCategoryId) return;
+      if (!confirm("¿Deseas resetear las estadísticas para esta palabra?")) return;
+      let w = words.find(x => x.id === wordId);
+      if (w) { w.failCount = 0; w.correctCount = 0; }
+      saveWords();
+      const user = auth.currentUser;
+      if (user) {
+        const colRef = collection(db, "users", user.uid, "categories", currentCategoryId, "globalHistory");
+        const snapshot = await getDocs(colRef);
+        for (const docSnap of snapshot.docs) {
+          if (docSnap.data().id === wordId) { await deleteDoc(docSnap.ref); }
+        }
+      }
+      alert("Estadísticas reiniciadas para la palabra.");
+      renderGlobalStats();
+    };
+
+    function initGlobalStatsSorting() {
+      const headers = document.querySelectorAll("#failTable thead th");
+      headers.forEach(th => {
+        th.addEventListener("click", () => {
+          const field = th.getAttribute("data-field");
+          if (!field) return;
+          if (currentSortField === field) { currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc'; }
+          else { currentSortField = field; currentSortOrder = 'asc'; }
+          renderGlobalStats();
+        });
+      });
+    }
+    function renderSessionStats() {
+      let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : "N/A";
+      if (!frontField && wordFieldsOrder.length > 0) { frontField = wordFieldsOrder[0]; }
+      const sessionStatsEl = document.getElementById("sessionStats");
+      if (sessionStatsEl) {
+        sessionStatsEl.textContent = `
+          Practicadas: ${sessionPracticed} | Aciertos: ${correctCount} |
+          Errores: ${sessionPracticed - correctCount} | Racha: ${currentStreak}
+        `;
+      }
+      const tbody = document.querySelector("#sessionDetailTable tbody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      responses.forEach((resp, i) => {
+        const card = practiceSessionWords[i];
+        const valorFrontal = card ? (card[frontField] || "-") : "-";
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${i + 1}</td><td>${valorFrontal}</td><td>${resp}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+    document.getElementById("tabGlobal").addEventListener("click", () => {
+      document.getElementById("globalStatsContainer").classList.add("active");
+      document.getElementById("sessionStatsContainer").classList.remove("active");
+      renderGlobalStats();
+    });
+    document.getElementById("tabSession").addEventListener("click", () => {
+      document.getElementById("sessionStatsContainer").classList.add("active");
+      document.getElementById("globalStatsContainer").classList.remove("active");
+      renderSessionStats();
+    });
+
+    function subscribeToPersonalizedLists() {
+      const user = auth.currentUser;
+      if (!user || !currentCategoryId) return;
+      const colRef = collection(db, "users", user.uid, "categories", currentCategoryId, "personalizedLists");
+      return onSnapshot(colRef, (snapshot) => {
+        personalizedLists = [];
+        snapshot.forEach(docSnap => { personalizedLists.push({ id: docSnap.id, ...docSnap.data() }); });
+        renderPersonalizedLists();
+      });
+    }
+
+    function renderPersonalizedLists() {
+      const container = document.getElementById("savedListsContainer");
+      if (!container) return;
+      container.innerHTML = "";
+      if (personalizedLists.length === 0) { container.innerHTML = "<p>No hay listas guardadas.</p>"; return; }
+      const ul = document.createElement("ul");
+      personalizedLists.forEach(list => {
+        const li = document.createElement("li");
+        const span = document.createElement("span");
+        span.textContent = list.name;
+        li.appendChild(span);
+        const btnLoad = document.createElement("button");
+        btnLoad.textContent = "Cargar";
+        btnLoad.onclick = () => loadPersonalizedList(list.wordIds);
+        const btnDelete = document.createElement("button");
+        btnDelete.textContent = "Eliminar";
+        btnDelete.onclick = () => deletePersonalizedList(list.id);
+        li.appendChild(btnLoad);
+        li.appendChild(btnDelete);
+        ul.appendChild(li);
+      });
+      container.appendChild(ul);
+    }
+
+    async function savePersonalizedList(name, wordIds) {
+      const user = auth.currentUser;
+      if (!user || !currentCategoryId) return;
+      try {
+        await addDoc(collection(db, "users", user.uid, "categories", currentCategoryId, "personalizedLists"), { name, wordIds });
+        alert("Lista guardada.");
+      } catch (e) {
+        console.error("Error guardando lista:", e);
+        alert("Error guardando lista.");
+      }
+    }
+
+    async function deletePersonalizedList(listId) {
+      const user = auth.currentUser;
+      if (!user || !currentCategoryId) return;
+      try {
+        await deleteDoc(doc(db, "users", user.uid, "categories", currentCategoryId, "personalizedLists", listId));
+        alert("Lista eliminada.");
+      } catch (e) {
+        console.error("Error eliminando lista:", e);
+        alert("Error eliminando lista.");
+      }
+    }
+
+    function loadPersonalizedList(wordIds) {
+      customPracticeList = words.filter(w => wordIds.includes(w.id));
+      renderCustomPracticeGrid();
+    }
+
+    const customPracticeSearch = document.getElementById("customPracticeSearch");
+    const customPracticeResultsTable = document.getElementById("customPracticeResults");
+    const startCustomPracticeBtn = document.getElementById("startCustomPractice");
+
+    function renderCustomPracticeResultsHeader() {
+      if (!customPracticeResultsTable) return;
+      const thead = customPracticeResultsTable.querySelector("thead");
+      if (!thead) return;
+      thead.innerHTML = "";
+      const headerRow = document.createElement("tr");
+      // Se muestran las primeras 2 columnas
+      wordFieldsOrder.slice(0,2).forEach(k => {
+        const f = wordFields.find(x => x.key === k);
+        if (f) {
+          const th = document.createElement("th");
+          th.textContent = f.label;
+          headerRow.appendChild(th);
         }
       });
-      
-      document.getElementById("focusBtnMostrar").addEventListener("click", () => {
-        let card;
-        if (focusPhase === "test") {
-          let blockStart = focusBlockIndex * settings.focusBlockSize;
-          let currentBlock = focusCards.slice(blockStart, blockStart + settings.focusBlockSize);
-          card = currentBlock[focusCurrentIndex];
-        } else if (focusPhase === "finalTest") { card = focusCards[focusCurrentIndex]; }
-        let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : (wordFieldsOrder[0] || "");
-        document.getElementById("focusDetails").innerHTML = renderCardDetails(card, frontField);
-        document.getElementById("focusDetails").classList.remove("hidden");
-        document.getElementById("focusBtnMostrar").classList.add("hidden");
-        document.getElementById("focusBtnBien").classList.remove("hidden");
-        document.getElementById("focusBtnMal").classList.remove("hidden");
+      const thAgregar = document.createElement("th");
+      thAgregar.textContent = "Acción";
+      headerRow.appendChild(thAgregar);
+      thead.appendChild(headerRow);
+    }
+
+    function renderCustomPracticeResultsBody(filtered) {
+      if (!customPracticeResultsTable) return;
+      const tbody = customPracticeResultsTable.querySelector("tbody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      filtered.forEach(item => {
+        const row = document.createElement("tr");
+        const isSelected = customPracticeList.some(x => x.id === item.id);
+        if(isSelected) row.classList.add("selected-result");
+        wordFieldsOrder.slice(0,2).forEach(k => {
+          const td = document.createElement("td");
+          td.textContent = item[k] || "";
+          row.appendChild(td);
+        });
+        const tdAccion = document.createElement("td");
+        const btnAgregar = document.createElement("button");
+        btnAgregar.textContent = "Agregar";
+        btnAgregar.style.background = "#4CAF50";
+        btnAgregar.style.color = "#fff";
+        btnAgregar.onclick = () => addToCustomPractice(item);
+        tdAccion.appendChild(btnAgregar);
+        row.appendChild(tdAccion);
+        tbody.appendChild(row);
       });
-      
-      document.getElementById("focusBtnBien").addEventListener("click", () => {
-        focusCurrentIndex++;
-        let total = (focusPhase === "finalTest") ? focusCards.length : settings.focusBlockSize;
-        if (focusCurrentIndex >= total) {
-          if (focusPhase === "test") {
+    }
+
+    function addToCustomPractice(item) {
+      const yaExiste = customPracticeList.find(x => x.id === item.id);
+      if (yaExiste) { alert("Esta palabra ya está en la lista personalizada."); return; }
+      customPracticeList.push(item);
+      renderCustomPracticeGrid();
+      renderCustomPracticeResultsBody(words);
+    }
+
+    function renderCustomPracticeGrid() {
+      const grid = document.getElementById("customPracticeGrid");
+      if (!grid) return;
+      grid.innerHTML = "";
+      let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : (wordFieldsOrder[0] || "");
+      customPracticeList.forEach((w, idx) => {
+        const card = document.createElement("div");
+        card.classList.add("custom-practice-card");
+        const frontText = document.createElement("p");
+        frontText.textContent = w[frontField] || "";
+        card.appendChild(frontText);
+        const btnVerMas = document.createElement("button");
+        btnVerMas.textContent = "Ver más";
+        btnVerMas.addEventListener("click", () => { openDetailModal(w); });
+        card.appendChild(btnVerMas);
+        const btnQuitar = document.createElement("button");
+        btnQuitar.textContent = "Quitar";
+        btnQuitar.style.background = "#f44336";
+        btnQuitar.style.color = "#fff";
+        btnQuitar.addEventListener("click", () => {
+          customPracticeList.splice(idx, 1);
+          renderCustomPracticeGrid();
+          renderCustomPracticeResultsBody(words);
+        });
+        card.appendChild(btnQuitar);
+        grid.appendChild(card);
+      });
+    }
+
+    function openDetailModal(word) {
+      let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : (wordFieldsOrder[0] || "");
+      let details = "";
+      wordFields.forEach(field => {
+        if (field.key !== frontField) {
+          details += `<p><strong>${field.label}:</strong> ${word[field.key] || ""}</p>`;
+        }
+      });
+      document.getElementById("detailModalContent").innerHTML = details;
+      document.getElementById("detailModal").classList.add("active");
+    }
+
+    document.getElementById("closeDetailModal").addEventListener("click", () => {
+      document.getElementById("detailModal").classList.remove("active");
+    });
+
+    // Evento para guardar lista personalizada (permite crear múltiples listas)
+    document.getElementById("btnSaveList").addEventListener("click", () => {
+      const name = document.getElementById("listNameInput").value.trim();
+      if (!name) { alert("Ingresa un nombre para la lista."); return; }
+      if (customPracticeList.length === 0) { alert("La lista está vacía."); return; }
+      const wordIds = customPracticeList.map(w => w.id);
+      savePersonalizedList(name, wordIds);
+      document.getElementById("listNameInput").value = "";
+    });
+
+    startCustomPracticeBtn.addEventListener("click", () => {
+      if (customPracticeList.length === 0) { alert("No hay palabras seleccionadas para la práctica personalizada."); return; }
+      startCustomPracticeSession();
+    });
+
+    async function startCustomPracticeSession() {
+      currentIndex = 0; correctCount = 0; sessionPracticed = 0; responses = []; currentStreak = 0;
+      weightedMode = false; practiceSessionWords = [...customPracticeList];
+      alert("¡Práctica personalizada iniciada! Ve a la sección 'Practicar' para usarla.");
+      showSection("sectionPracticar"); showCard();
+    }
+
+    function startFocusModeSession() {
+      if (customPracticeList.length < settings.focusTestSize) {
+        alert("Necesitas al menos " + settings.focusTestSize + " palabras para Focus Mode.");
+        return;
+      }
+      focusCards = customPracticeList.slice(0, settings.focusTestSize);
+      focusBlockIndex = 0; focusPhase = "memorization"; focusCurrentIndex = 0;
+      settings.focusBlockSize = parseInt(document.getElementById("focusBlockSize").value);
+      settings.focusTestSize = parseInt(document.getElementById("focusTestSize").value);
+      openFocusModal();
+      runMemorizationPhase();
+    }
+
+    function runMemorizationPhase() {
+      document.getElementById("focusPhaseTitle").textContent = "Memorización - Bloque " + (focusBlockIndex + 1);
+      focusPhase = "memorization"; focusCurrentIndex = 0;
+      showFocusCard();
+    }
+
+    function runTestPhase() {
+      document.getElementById("focusPhaseTitle").textContent = "Test - Bloque " + (focusBlockIndex + 1);
+      focusPhase = "test"; focusCurrentIndex = 0;
+      showFocusCard();
+    }
+
+    function runFinalTestPhase() {
+      document.getElementById("focusPhaseTitle").textContent = "Test Final - Todas las Palabras";
+      focusPhase = "finalTest"; focusCurrentIndex = 0;
+      showFocusCard();
+    }
+
+    function showFocusCard() {
+      updateFocusProgress();
+      let card;
+      if (focusPhase === "memorization" || focusPhase === "test") {
+        let blockStart = focusBlockIndex * settings.focusBlockSize;
+        let currentBlock = focusCards.slice(blockStart, blockStart + settings.focusBlockSize);
+        if (focusCurrentIndex >= currentBlock.length) {
+          if (focusPhase === "memorization") { runTestPhase(); return; }
+          else if (focusPhase === "test") {
             focusBlockIndex++;
             if (focusBlockIndex * settings.focusBlockSize < focusCards.length) { runMemorizationPhase(); }
             else { runFinalTestPhase(); }
-          } else if (focusPhase === "finalTest") { alert("¡Focus Mode completado!"); closeFocusModal(); return; }
-        } else { showFocusCard(); }
-      });
-      
-      document.getElementById("focusBtnMal").addEventListener("click", () => {
-        alert("Fallaste en el test. Reiniciando este bloque.");
-        focusCurrentIndex = 0;
-        showFocusCard();
-      });
-      
-      document.getElementById("btnExitFocusMode").addEventListener("click", () => { closeFocusModal(); });
-      
-      function openFocusModal() { document.getElementById("focusModeModal").style.display = "block"; }
-      function closeFocusModal() { document.getElementById("focusModeModal").style.display = "none"; }
-      
-      document.getElementById("btnFocusMode").addEventListener("click", startFocusModeSession);
-      
-      function applyTheme() {
-        if (document.getElementById("darkTheme").checked) { document.body.classList.add("dark-theme"); settings.darkTheme = true; }
-        else { document.body.classList.remove("dark-theme"); settings.darkTheme = false; }
-        saveSettings();
-      }
-      function saveSettings() { localStorage.setItem("settings", JSON.stringify(settings)); }
-      function loadSettings() {
-        const stored = localStorage.getItem("settings");
-        if (stored) {
-          settings = JSON.parse(stored);
-          document.getElementById("keyMostrar").value = settings.keyMostrar;
-          document.getElementById("keyCorrect").value = settings.keyCorrect;
-          document.getElementById("keyIncorrect").value = settings.keyIncorrect;
-          document.getElementById("problemThreshold").value = settings.problemThreshold;
-          document.getElementById("feedbackDelay").value = settings.feedbackDelay;
-          document.getElementById("audioEnabled").value = settings.audioEnabled ? "true" : "false";
-          document.getElementById("darkTheme").checked = settings.darkTheme;
-          document.getElementById("notificationsEnabled").checked = settings.notificationsEnabled;
-          document.getElementById("newWordsCount").value = settings.newWordsCount;
-          document.getElementById("focusBlockSize").value = settings.focusBlockSize;
-          document.getElementById("focusTestSize").value = settings.focusTestSize;
-          applyTheme();
-        }
-      }
-      const settingsForm = document.getElementById("settingsForm");
-      settingsForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        settings.keyMostrar = document.getElementById("keyMostrar").value;
-        settings.keyCorrect = document.getElementById("keyCorrect").value;
-        settings.keyIncorrect = document.getElementById("keyIncorrect").value;
-        settings.problemThreshold = parseInt(document.getElementById("problemThreshold").value);
-        settings.feedbackDelay = parseInt(document.getElementById("feedbackDelay").value);
-        settings.audioEnabled = (document.getElementById("audioEnabled").value === "true");
-        settings.darkTheme = document.getElementById("darkTheme").checked;
-        settings.notificationsEnabled = document.getElementById("notificationsEnabled").checked;
-        settings.newWordsCount = parseInt(document.getElementById("newWordsCount").value);
-        settings.focusBlockSize = parseInt(document.getElementById("focusBlockSize").value);
-        settings.focusTestSize = parseInt(document.getElementById("focusTestSize").value);
-        saveSettings(); applyTheme();
-        alert("Ajustes guardados.");
-      });
-      document.getElementById("resetStats").addEventListener("click", async () => {
-        const user = auth.currentUser;
-        if (!user) { alert("Debes iniciar sesión para resetear estadísticas."); return; }
-        if (!confirm("¿Seguro que deseas resetear las estadísticas de TODAS las carátulas?")) return;
-        try {
-          for (let cat of categories) {
-            cat.words.forEach(w => { w.failCount = 0; w.correctCount = 0; });
-            const docRef = doc(db, "users", user.uid, "categories", cat.id);
-            await setDoc(docRef, { words: cat.words }, { merge: true });
-            const colRef = collection(db, "users", user.uid, "categories", cat.id, "globalHistory");
-            const snap = await getDocs(colRef);
-            for (const d of snap.docs) { await deleteDoc(d.ref); }
+            return;
           }
-          alert("Estadísticas de TODAS las carátulas reiniciadas.");
-        } catch (err) {
-          console.error("Error al resetear estadísticas globales:", err);
-          alert("Error al resetear estadísticas. Ver consola.");
+        } else { card = currentBlock[focusCurrentIndex]; }
+      } else if (focusPhase === "finalTest") {
+        if (focusCurrentIndex >= focusCards.length) { alert("¡Focus Mode completado!"); closeFocusModal(); return; }
+        else { card = focusCards[focusCurrentIndex]; }
+      }
+      let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : (wordFieldsOrder[0] || "");
+      let flashcard = document.getElementById("focusFlashcard");
+      flashcard.style.borderLeft = "10px solid " + obtenerColor(card);
+      flashcard.style.borderRight = "10px solid " + obtenerColor(card);
+      flashcard.style.borderTop = "4px solid transparent";
+      flashcard.style.borderBottom = "4px solid transparent";
+      flashcard.textContent = card[frontField] || "?";
+      if (focusPhase === "memorization") {
+        document.getElementById("focusDetails").innerHTML = renderCardDetails(card, frontField);
+        document.getElementById("focusDetails").classList.remove("hidden");
+        document.getElementById("btnConfirmMemorization").classList.remove("hidden");
+        document.getElementById("focusBtnMostrar").classList.add("hidden");
+        document.getElementById("focusBtnBien").classList.add("hidden");
+        document.getElementById("focusBtnMal").classList.add("hidden");
+      } else {
+        document.getElementById("focusDetails").classList.add("hidden");
+        document.getElementById("btnConfirmMemorization").classList.add("hidden");
+        document.getElementById("focusBtnMostrar").classList.remove("hidden");
+        document.getElementById("focusBtnBien").classList.add("hidden");
+        document.getElementById("focusBtnMal").classList.add("hidden");
+      }
+    }
+
+    function updateFocusProgress() {
+      let total = (focusPhase === "finalTest") ? focusCards.length : settings.focusBlockSize;
+      let pct = (focusCurrentIndex / total) * 100;
+      document.getElementById("focusProgressBar").style.width = pct + "%";
+      document.getElementById("focusProgressCount").textContent = `Progreso: ${focusCurrentIndex} / ${total}`;
+    }
+
+    document.getElementById("btnConfirmMemorization").addEventListener("click", () => {
+      if (focusPhase === "memorization") {
+        focusCurrentIndex++;
+        let blockSize = settings.focusBlockSize;
+        if (focusCurrentIndex >= blockSize) { runTestPhase(); }
+        else { showFocusCard(); }
+      }
+    });
+
+    document.getElementById("focusBtnMostrar").addEventListener("click", () => {
+      let card;
+      if (focusPhase === "test") {
+        let blockStart = focusBlockIndex * settings.focusBlockSize;
+        let currentBlock = focusCards.slice(blockStart, blockStart + settings.focusBlockSize);
+        card = currentBlock[focusCurrentIndex];
+      } else if (focusPhase === "finalTest") { card = focusCards[focusCurrentIndex]; }
+      let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : (wordFieldsOrder[0] || "");
+      document.getElementById("focusDetails").innerHTML = renderCardDetails(card, frontField);
+      document.getElementById("focusDetails").classList.remove("hidden");
+      document.getElementById("focusBtnMostrar").classList.add("hidden");
+      document.getElementById("focusBtnBien").classList.remove("hidden");
+      document.getElementById("focusBtnMal").classList.remove("hidden");
+    });
+
+    document.getElementById("focusBtnBien").addEventListener("click", () => {
+      focusCurrentIndex++;
+      let total = (focusPhase === "finalTest") ? focusCards.length : settings.focusBlockSize;
+      if (focusCurrentIndex >= total) {
+        if (focusPhase === "test") {
+          focusBlockIndex++;
+          if (focusBlockIndex * settings.focusBlockSize < focusCards.length) { runMemorizationPhase(); }
+          else { runFinalTestPhase(); }
+        } else if (focusPhase === "finalTest") { alert("¡Focus Mode completado!"); closeFocusModal(); return; }
+      } else { showFocusCard(); }
+    });
+
+    document.getElementById("focusBtnMal").addEventListener("click", () => {
+      alert("Fallaste en el test. Reiniciando este bloque.");
+      focusCurrentIndex = 0;
+      showFocusCard();
+    });
+
+    document.getElementById("btnExitFocusMode").addEventListener("click", () => { closeFocusModal(); });
+
+    function openFocusModal() { document.getElementById("focusModeModal").style.display = "block"; }
+    function closeFocusModal() { document.getElementById("focusModeModal").style.display = "none"; }
+
+    document.getElementById("btnFocusMode").addEventListener("click", startFocusModeSession);
+
+    function applyTheme() {
+      if (document.getElementById("darkTheme").checked) { document.body.classList.add("dark-theme"); settings.darkTheme = true; }
+      else { document.body.classList.remove("dark-theme"); settings.darkTheme = false; }
+      saveSettings();
+    }
+    function saveSettings() { localStorage.setItem("settings", JSON.stringify(settings)); }
+    function loadSettings() {
+      const stored = localStorage.getItem("settings");
+      if (stored) {
+        settings = JSON.parse(stored);
+        document.getElementById("keyMostrar").value = settings.keyMostrar;
+        document.getElementById("keyCorrect").value = settings.keyCorrect;
+        document.getElementById("keyIncorrect").value = settings.keyIncorrect;
+        document.getElementById("problemThreshold").value = settings.problemThreshold;
+        document.getElementById("feedbackDelay").value = settings.feedbackDelay;
+        document.getElementById("audioEnabled").value = settings.audioEnabled ? "true" : "false";
+        document.getElementById("darkTheme").checked = settings.darkTheme;
+        document.getElementById("notificationsEnabled").checked = settings.notificationsEnabled;
+        document.getElementById("newWordsCount").value = settings.newWordsCount;
+        document.getElementById("focusBlockSize").value = settings.focusBlockSize;
+        document.getElementById("focusTestSize").value = settings.focusTestSize;
+        applyTheme();
+      }
+    }
+    const settingsForm = document.getElementById("settingsForm");
+    settingsForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      settings.keyMostrar = document.getElementById("keyMostrar").value;
+      settings.keyCorrect = document.getElementById("keyCorrect").value;
+      settings.keyIncorrect = document.getElementById("keyIncorrect").value;
+      settings.problemThreshold = parseInt(document.getElementById("problemThreshold").value);
+      settings.feedbackDelay = parseInt(document.getElementById("feedbackDelay").value);
+      settings.audioEnabled = (document.getElementById("audioEnabled").value === "true");
+      settings.darkTheme = document.getElementById("darkTheme").checked;
+      settings.notificationsEnabled = document.getElementById("notificationsEnabled").checked;
+      settings.newWordsCount = parseInt(document.getElementById("newWordsCount").value);
+      settings.focusBlockSize = parseInt(document.getElementById("focusBlockSize").value);
+      settings.focusTestSize = parseInt(document.getElementById("focusTestSize").value);
+      saveSettings(); applyTheme();
+      alert("Ajustes guardados.");
+    });
+    document.getElementById("resetStats").addEventListener("click", async () => {
+      const user = auth.currentUser;
+      if (!user) { alert("Debes iniciar sesión para resetear estadísticas."); return; }
+      if (!confirm("¿Seguro que deseas resetear las estadísticas de TODAS las carátulas?")) return;
+      try {
+        for (let cat of categories) {
+          cat.words.forEach(w => { w.failCount = 0; w.correctCount = 0; });
+          const docRef = doc(db, "users", user.uid, "categories", cat.id);
+          await setDoc(docRef, { words: cat.words }, { merge: true });
+          const colRef = collection(db, "users", user.uid, "categories", cat.id, "globalHistory");
+          const snap = await getDocs(colRef);
+          for (const d of snap.docs) { await deleteDoc(d.ref); }
         }
+        alert("Estadísticas de TODAS las carátulas reiniciadas.");
+      } catch (err) {
+        console.error("Error al resetear estadísticas globales:", err);
+        alert("Error al resetear estadísticas. Ver consola.");
+      }
+    });
+    document.getElementById("resetAll").addEventListener("click", async () => {
+      if (!confirm("Esto borrará TODOS tus datos y ajustes. ¿Estás seguro?")) return;
+      localStorage.clear();
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          const colRef = collection(db, "users", user.uid, "categories");
+          const snap = await getDocs(colRef);
+          for (const docSnap of snap.docs) {
+            const catId = docSnap.id;
+            const subColRef = collection(db, "users", user.uid, "categories", catId, "globalHistory");
+            const subSnap = await getDocs(subColRef);
+            for (const d of subSnap.docs) { await deleteDoc(d.ref); }
+            await deleteDoc(docSnap.ref);
+          }
+        } catch (err) { console.error("Error borrando carátulas:", err); }
+      }
+      alert("Todos los datos fueron borrados.");
+      location.reload();
+    });
+
+    function speak(text) {
+      if ('speechSynthesis' in window && settings.audioEnabled) {
+        const voices = window.speechSynthesis.getVoices();
+        const mandarinVoice = voices.find(voice => voice.lang === 'zh-CN');
+        const utterance = new SpeechSynthesisUtterance(text);
+        if (mandarinVoice) { utterance.voice = mandarinVoice; }
+        utterance.lang = 'zh-CN';
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+    function weightedShuffle(array) {
+      return array.map(card => {
+        const total = (card.failCount || 0) + (card.correctCount || 0);
+        const accuracy = total > 0 ? (card.correctCount / total) * 100 : 50;
+        let weight = 100 - accuracy;
+        if (weight <= 0) weight = 0.01;
+        return { card, sortKey: -Math.log(Math.random()) / weight };
+      })
+      .sort((a, b) => a.sortKey - b.sortKey)
+      .map(obj => obj.card);
+    }
+    function renderCardDetails(card, frontField) {
+      let details = "";
+      wordFields.forEach(field => {
+        if (field.key !== frontField) { details += `<p><strong>${field.label}:</strong> ${card[field.key] || ""}</p>`; }
       });
-      document.getElementById("resetAll").addEventListener("click", async () => {
-        if (!confirm("Esto borrará TODOS tus datos y ajustes. ¿Estás seguro?")) return;
-        localStorage.clear();
-        const user = auth.currentUser;
-        if (user) {
-          try {
-            const colRef = collection(db, "users", user.uid, "categories");
-            const snap = await getDocs(colRef);
-            for (const docSnap of snap.docs) {
-              const catId = docSnap.id;
-              const subColRef = collection(db, "users", user.uid, "categories", catId, "globalHistory");
-              const subSnap = await getDocs(subColRef);
-              for (const d of subSnap.docs) { await deleteDoc(d.ref); }
-              await deleteDoc(docSnap.ref);
-            }
-          } catch (err) { console.error("Error borrando carátulas:", err); }
-        }
-        alert("Todos los datos fueron borrados.");
-        location.reload();
-      });
-      
-      function speak(text) {
-        if ('speechSynthesis' in window && settings.audioEnabled) {
-          const voices = window.speechSynthesis.getVoices();
-          const mandarinVoice = voices.find(voice => voice.lang === 'zh-CN');
-          const utterance = new SpeechSynthesisUtterance(text);
-          if (mandarinVoice) { utterance.voice = mandarinVoice; }
-          utterance.lang = 'zh-CN';
-          window.speechSynthesis.speak(utterance);
-        }
+      return details;
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      loadSettings(); initGlobalStatsSorting(); showSection("sectionCaratulas");
+      const storedCatId = localStorage.getItem("currentCategoryId");
+      if (storedCatId) { currentCategoryId = storedCatId; }
+      const tabPalabras = document.getElementById("tabPalabras");
+      const tabCampos = document.getElementById("tabCampos");
+      const tabPalabrasContent = document.getElementById("tabPalabrasContent");
+      const tabCamposContent = document.getElementById("tabCamposContent");
+      if (tabPalabras && tabCampos && tabPalabrasContent && tabCamposContent) {
+        tabPalabras.addEventListener("click", () => { tabPalabrasContent.classList.add("active"); tabCamposContent.classList.remove("active"); });
+        tabCampos.addEventListener("click", () => { tabCamposContent.classList.add("active"); tabPalabrasContent.classList.remove("active"); });
       }
-      
-      function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-      }
-      function weightedShuffle(array) {
-        return array.map(card => {
-          const total = (card.failCount || 0) + (card.correctCount || 0);
-          const accuracy = total > 0 ? (card.correctCount / total) * 100 : 50;
-          let weight = 100 - accuracy;
-          if (weight <= 0) weight = 0.01;
-          return { card, sortKey: -Math.log(Math.random()) / weight };
-        })
-        .sort((a, b) => a.sortKey - b.sortKey)
-        .map(obj => obj.card);
-      }
-      function renderCardDetails(card, frontField) {
-        let details = "";
-        wordFields.forEach(field => {
-          if (field.key !== frontField) { details += `<p><strong>${field.label}:</strong> ${card[field.key] || ""}</p>`; }
-        });
-        return details;
-      }
-      
-      window.addEventListener("DOMContentLoaded", () => {
-        loadSettings(); initGlobalStatsSorting(); showSection("sectionCaratulas");
-        const storedCatId = localStorage.getItem("currentCategoryId");
-        if (storedCatId) { currentCategoryId = storedCatId; }
-        const tabPalabras = document.getElementById("tabPalabras");
-        const tabCampos = document.getElementById("tabCampos");
-        const tabPalabrasContent = document.getElementById("tabPalabrasContent");
-        const tabCamposContent = document.getElementById("tabCamposContent");
-        if (tabPalabras && tabCampos && tabPalabrasContent && tabCamposContent) {
-          tabPalabras.addEventListener("click", () => { tabPalabrasContent.classList.add("active"); tabCamposContent.classList.remove("active"); });
-          tabCampos.addEventListener("click", () => { tabCamposContent.classList.add("active"); tabPalabrasContent.classList.remove("active"); });
-        }
-        document.getElementById("openAddTableModalBtn").addEventListener("click", () => { document.getElementById("addTableModal").style.display = "block"; });
-        document.getElementById("closeAddTableModal").addEventListener("click", () => { document.getElementById("addTableModal").style.display = "none"; });
-        document.getElementById("toggleSavedLists").addEventListener("click", () => { document.getElementById("savedListsContainer").classList.toggle("hidden"); });
-      });
-      
-    }); // Fin DOMContentLoaded
+      document.getElementById("openAddTableModalBtn").addEventListener("click", () => { document.getElementById("addTableModal").style.display = "block"; });
+      document.getElementById("closeAddTableModal").addEventListener("click", () => { document.getElementById("addTableModal").style.display = "none"; });
+      document.getElementById("toggleSavedLists").addEventListener("click", () => { document.getElementById("savedListsContainer").classList.toggle("hidden"); });
+    });
   </script>
 </body>
 </html>
