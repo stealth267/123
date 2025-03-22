@@ -187,36 +187,6 @@
       #failTable th, #failTable td {
          padding: 8px;
       }
-      /* Transformar la tabla de Palabras Seleccionadas en formato stacked */
-      #customPracticeTable thead {
-        display: none;
-      }
-      #customPracticeTable,
-      #customPracticeTable tbody,
-      #customPracticeTable tr,
-      #customPracticeTable td {
-        display: block;
-        width: 100%;
-      }
-      #customPracticeTable tr {
-        margin-bottom: 15px;
-        border-bottom: 1px solid #ccc;
-      }
-      #customPracticeTable td {
-        text-align: right;
-        padding-left: 50%;
-        position: relative;
-        border: none;
-      }
-      #customPracticeTable td::before {
-        content: attr(data-label);
-        position: absolute;
-        left: 0;
-        width: 45%;
-        padding-left: 10px;
-        font-weight: bold;
-        text-align: left;
-      }
     }
     
     /* Nuevas reglas para separar el contenedor de práctica de la barra de progreso */
@@ -1714,6 +1684,7 @@
       statsArray.forEach(obj => {
         obj.total = obj.failCount + obj.correctCount;
         obj.accuracy = obj.total > 0 ? ((obj.correctCount / obj.total) * 100).toFixed(2) + "%" : "0%";
+        // Se elimina la calificación ya que no se muestra en la tabla actualizada
       });
       statsArray.sort((a, b) => {
         let diff = 0;
@@ -1926,7 +1897,6 @@
       renderCustomPracticeResultsBody(words);
     }
 
-    // Aquí se modifica la función para asignar data-label a cada celda para el formato stacked
     function renderCustomPracticeTable() {
       if (!customPracticeTable) return;
       const thead = customPracticeTable.querySelector("thead");
@@ -1952,12 +1922,8 @@
         const row = document.createElement("tr");
         row.classList.add("highlighted-row");
         wordFieldsOrder.forEach(k => {
-          const f = wordFields.find(x => x.key === k);
           const td = document.createElement("td");
           td.textContent = w[k] || "";
-          if (f) {
-            td.setAttribute("data-label", f.label);
-          }
           row.appendChild(td);
         });
         const tdEliminar = document.createElement("td");
@@ -2011,6 +1977,7 @@
     /********************************
      * FOCUS MODE (POP UP)
      ********************************/
+    // Inicia Focus Mode usando las palabras seleccionadas (al menos focusTestSize)
     function startFocusModeSession() {
       if (customPracticeList.length < settings.focusTestSize) {
         alert("Necesitas al menos " + settings.focusTestSize + " palabras para Focus Mode.");
@@ -2018,6 +1985,7 @@
       }
       focusCards = customPracticeList.slice(0, settings.focusTestSize);
       focusBlockIndex = 0; focusPhase = "memorization"; focusCurrentIndex = 0;
+      // Actualiza ajustes de Focus Mode
       settings.focusBlockSize = parseInt(document.getElementById("focusBlockSize").value);
       settings.focusTestSize = parseInt(document.getElementById("focusTestSize").value);
       openFocusModal();
@@ -2069,6 +2037,7 @@
       flashcard.style.borderBottom = "4px solid transparent";
       flashcard.textContent = card[frontField] || "?";
       if (focusPhase === "memorization") {
+        // En memorization se muestra el detalle completo junto con el botón de Confirmar Memorización
         document.getElementById("focusDetails").innerHTML = renderCardDetails(card, frontField);
         document.getElementById("focusDetails").classList.remove("hidden");
         document.getElementById("btnConfirmMemorization").classList.remove("hidden");
@@ -2076,6 +2045,7 @@
         document.getElementById("focusBtnBien").classList.add("hidden");
         document.getElementById("focusBtnMal").classList.add("hidden");
       } else {
+        // En test o finalTest solo se muestra el frente inicialmente; se activa el botón "Mostrar"
         document.getElementById("focusDetails").classList.add("hidden");
         document.getElementById("btnConfirmMemorization").classList.add("hidden");
         document.getElementById("focusBtnMostrar").classList.remove("hidden");
@@ -2100,6 +2070,7 @@
       }
     });
 
+    // En fase de test, se utiliza un botón Mostrar para revelar el detalle
     document.getElementById("focusBtnMostrar").addEventListener("click", () => {
       let card;
       if (focusPhase === "test") {
@@ -2138,6 +2109,7 @@
     function openFocusModal() { document.getElementById("focusModeModal").style.display = "block"; }
     function closeFocusModal() { document.getElementById("focusModeModal").style.display = "none"; }
 
+    // Asigna el evento al botón Focus Mode en la sección Aprendizaje
     document.getElementById("btnFocusMode").addEventListener("click", startFocusModeSession);
 
     /********************************
