@@ -60,7 +60,7 @@
     }
     table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 16px; }
     table, th, td { border: 1px solid #ccc; }
-    th, td { padding: 8px; text-align: center; vertical-align: middle; cursor: pointer; white-space: normal; }
+    th, td { padding: 8px; text-align: center; vertical-align: middle; cursor: pointer; }
     th { background: #eee; }
     form input, form textarea, form select {
       margin: 5px 0; padding: 8px; font-size: 16px; width: 100%;
@@ -143,71 +143,23 @@
     }
     /* Sección Aprendizaje */
     #sectionNuevas { margin: 1em auto; max-width: 1200px; padding: 1em; }
-    /* Agregamos espacio entre bloques en la sección de Aprendizaje */
-    .aprendizaje-block {
-      margin-bottom: 1em;
+    /* Espaciado entre bloques de la sección Aprendizaje */
+    .aprendizaje-block { margin-bottom: 1em; }
+    /* Ajuste para que las tablas en la sección Aprendizaje se adapten sin scroll bars */
+    #sectionNuevas table {
+      width: 100%;
+      table-layout: fixed;
+      word-break: break-word;
     }
-    .toggle-saved-lists {
-      width: 40px; height: 40px; border-radius: 50%; background: #ddd;
-      border: none; display: flex; align-items: center; justify-content: center;
-      font-size: 24px; cursor: pointer; margin-bottom: 0.5em;
+    /* Opcional: aumentar el padding en las celdas dentro de Aprendizaje */
+    #sectionNuevas th, 
+    #sectionNuevas td {
+      padding: 10px;
     }
-    .saved-lists-container { margin-top: 0.5em; border-top: 1px solid #ccc; padding-top: 0.5em; }
-    .saved-lists-container ul { list-style: none; padding: 0; margin: 0; }
-    .saved-lists-container li {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 5px; border-bottom: 1px solid #ccc; margin-bottom: 5px;
-    }
-    .saved-lists-container li span { flex: 1; margin-right: 10px; }
-    .saved-lists-container li button { margin-left: 5px; }
-    .add-word-btn {
-      width: 40px; height: 40px; border: 1px solid #ccc;
-      border-radius: 4px; background: #eee; font-size: 24px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; margin: 0 auto;
-    }
-    .btn-iniciar-practica {
-      background: #888; color: #fff; padding: 10px 15px;
-      border: none; border-radius: 4px; cursor: pointer;
-    }
-    .btn-iniciar-practica:hover { background: #666; }
-    #customPracticeResultsContainer { max-height: 300px; overflow-y: auto; }
-    
-    /* Modal de Focus Mode */
-    #focusModeModal .modal-content {
-      max-width: 700px; text-align: center;
-    }
-    /* Estilos para botones en Focus Mode (alineados con práctica) */
-    #focusModeModal #focusButtons button {
-      font-size: 18px;
-      padding: 12px 24px;
-    }
-    
-    /* Ajustes para pantallas pequeñas (iPhone, etc.) */
-    @media only screen and (max-width: 600px) {
-      .caratula-cards {
-        justify-content: center;
-        padding: 0 10px;
-      }
-      .caratula-card {
-        width: 100%;
-        max-width: 300px;
-        margin: 0 auto;
-      }
-      /* Ajustes específicos para la sección de Aprendizaje */
-      #sectionNuevas table {
-        font-size: 14px;
-        table-layout: fixed;
-        width: 100%;
-      }
-      #sectionNuevas table th, #sectionNuevas table td {
-        padding: 6px;
-        word-wrap: break-word;
-        white-space: normal;
-      }
-      .aprendizaje-block {
-        margin-bottom: 1em;
-      }
+    /* Si se desea que en el modal se muestren todas las filas sin scroll */
+    #customPracticeResultsContainer {
+      max-height: none;
+      overflow-y: visible;
     }
     
     /* Nuevas reglas para separar el contenedor de práctica de la barra de progreso */
@@ -218,6 +170,112 @@
     #progressBarContainer {
       margin-top: 1em; /* Espacio superior para separar de la sección anterior */
     }
+
+    /* -------------------------------------------------------------------------
+       NUEVO: Ajustes de tabla responsive para #failTable y #sessionDetailTable
+       ------------------------------------------------------------------------- */
+    @media only screen and (max-width: 600px) {
+      /* Permitir scroll vertical completo si se desea */
+      body {
+        overflow-x: visible;
+      }
+
+      /* Ajusta márgenes/padding generales para que no se vean tan pegados */
+      section {
+        padding: 10px;
+      }
+
+      /* Ajuste para la tabla de estadísticas globales (#failTable) */
+      #failTable,
+      #failTable thead,
+      #failTable tbody,
+      #failTable th,
+      #failTable td,
+      #failTable tr {
+        display: block;
+        width: 100%;
+      }
+      #failTable thead tr {
+        display: none; /* Ocultamos la cabecera en móvil */
+      }
+      #failTable tr {
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 8px;
+      }
+      #failTable td {
+        display: block;
+        text-align: left;
+        padding: 6px 0;
+        position: relative;
+        word-wrap: break-word;
+        white-space: normal;
+      }
+      #failTable td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: inline-block;
+        width: 50%;
+        margin-right: 10px;
+        color: #555;
+      }
+
+      /* Ajuste para la tabla de estadísticas de sesión (#sessionDetailTable) */
+      #sessionDetailTable,
+      #sessionDetailTable thead,
+      #sessionDetailTable tbody,
+      #sessionDetailTable th,
+      #sessionDetailTable td,
+      #sessionDetailTable tr {
+        display: block;
+        width: 100%;
+      }
+      #sessionDetailTable thead tr {
+        display: none;
+      }
+      #sessionDetailTable tr {
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 8px;
+      }
+      #sessionDetailTable td {
+        display: block;
+        text-align: left;
+        padding: 6px 0;
+        position: relative;
+        word-wrap: break-word;
+        white-space: normal;
+      }
+      #sessionDetailTable td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: inline-block;
+        width: 50%;
+        margin-right: 10px;
+        color: #555;
+      }
+
+      /* Ya existente en tu código para la sección de aprendizaje, ajustado aquí */
+      .caratula-cards {
+        justify-content: center;
+        padding: 0 10px;
+      }
+      .caratula-card {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+      }
+      #sectionNuevas table,
+      #sectionNuevas th,
+      #sectionNuevas td {
+        font-size: 14px;
+        padding: 8px;
+      }
+    }
+    
+    /* Nuevas reglas (FIN) */
   </style>
 </head>
 <body>
@@ -703,7 +761,8 @@
     document.getElementById("btnGestionar").addEventListener("click", () => showSection("sectionGestionar"));
     document.getElementById("btnEstadisticas").addEventListener("click", () => {
       showSection("sectionEstadisticas");
-      renderGlobalStats(); renderSessionStats();
+      renderGlobalStats(); 
+      renderSessionStats();
     });
     document.getElementById("btnNuevas").addEventListener("click", () => { showSection("sectionNuevas"); });
     document.getElementById("btnAjustes").addEventListener("click", () => showSection("sectionAjustes"));
@@ -754,7 +813,9 @@
         loginStatus.textContent = "No hay usuario logueado";
         btnLogout.style.display = "none";
         words = []; wordFields = []; wordFieldsOrder = []; globalHistory = [];
-        renderizarTabla(); generarFormularioDinamico([]); updateFieldsList();
+        renderizarTabla(); 
+        generarFormularioDinamico([]); 
+        updateFieldsList();
         const frontSelect = document.getElementById("frontField");
         if (frontSelect) frontSelect.innerHTML = "<option>No hay campos</option>";
       }
@@ -778,7 +839,8 @@
             wordFieldsOrder: data.wordFieldsOrder || []
           });
         });
-        renderCaratulaCards(); renderAllDropdowns();
+        renderCaratulaCards(); 
+        renderAllDropdowns();
       });
     }
 
@@ -791,39 +853,55 @@
       categories.forEach(cat => {
         const card = document.createElement("div");
         card.classList.add("caratula-card");
-        if (cat.id === currentCategoryId) { card.style.border = "2px solid #4caf50"; }
+        if (cat.id === currentCategoryId) {
+          card.style.border = "2px solid #4caf50";
+        }
         const title = document.createElement("h3");
         title.textContent = cat.name;
         card.appendChild(title);
+
         const btnEditar = document.createElement("button");
         btnEditar.textContent = "Editar Nombre";
         btnEditar.addEventListener("click", (e) => {
           e.stopPropagation();
           const nuevoNombre = prompt("Introduce el nuevo nombre para la carátula:", cat.name);
-          if (nuevoNombre && nuevoNombre.trim() !== "") { actualizarNombreCaratula(cat.id, nuevoNombre.trim()); }
+          if (nuevoNombre && nuevoNombre.trim() !== "") {
+            actualizarNombreCaratula(cat.id, nuevoNombre.trim());
+          }
         });
         card.appendChild(btnEditar);
+
         const btnResetStats = document.createElement("button");
         btnResetStats.textContent = "Reiniciar Stats";
         btnResetStats.addEventListener("click", (e) => {
           e.stopPropagation();
-          if (confirm(`¿Seguro que deseas reiniciar stats de "${cat.name}"?`)) { resetCategoryStats(cat.id); }
+          if (confirm(`¿Seguro que deseas reiniciar stats de "${cat.name}"?`)) {
+            resetCategoryStats(cat.id);
+          }
         });
         card.appendChild(btnResetStats);
+
         const btnDelete = document.createElement("button");
         btnDelete.textContent = "Eliminar Carátula";
         btnDelete.addEventListener("click", (e) => {
           e.stopPropagation();
-          if (confirm(`¿Eliminar carátula "${cat.name}" y todos sus datos?`)) { deleteCategory(cat.id); }
+          if (confirm(`¿Eliminar carátula "${cat.name}" y todos sus datos?`)) {
+            deleteCategory(cat.id);
+          }
         });
         card.appendChild(btnDelete);
-        card.addEventListener("click", () => { selectCategoryById(cat.id); });
+
+        card.addEventListener("click", () => {
+          selectCategoryById(cat.id);
+        });
         caratulaCardsContainer.appendChild(card);
       });
       const plusCard = document.createElement("div");
       plusCard.classList.add("caratula-card", "caratula-create-card");
       plusCard.textContent = "+";
-      plusCard.addEventListener("click", () => { document.getElementById("createCaratulaModal").style.display = "block"; });
+      plusCard.addEventListener("click", () => {
+        document.getElementById("createCaratulaModal").style.display = "block";
+      });
       caratulaCardsContainer.appendChild(plusCard);
     }
 
@@ -853,7 +931,10 @@
       if (!user) return;
       const nameInput = document.getElementById("newCaratulaName");
       const name = nameInput.value.trim();
-      if (!name) { alert("Debes colocar un nombre de carátula."); return; }
+      if (!name) {
+        alert("Debes colocar un nombre de carátula.");
+        return;
+      }
       nameInput.value = "";
       createCaratulaModal.style.display = "none";
       try {
@@ -871,13 +952,17 @@
     function selectCategoryById(catId) {
       currentCategoryId = catId;
       localStorage.setItem("currentCategoryId", catId);
-      loadCategoryData(); updateDropdownChecks(); updateAllDropdownsSelection();
+      loadCategoryData();
+      updateDropdownChecks();
+      updateAllDropdownsSelection();
     }
     function updateAllDropdownsSelection() {
       const allSelectIds = [ "caratulaDropdownPracticar", "caratulaDropdownGestionar", "caratulaDropdownEstadisticas", "caratulaDropdownNuevas" ];
       allSelectIds.forEach(selectId => {
         const sel = document.getElementById(selectId);
-        if (sel) { sel.value = currentCategoryId; }
+        if (sel) {
+          sel.value = currentCategoryId;
+        }
       });
       updateDropdownChecks();
     }
@@ -888,7 +973,8 @@
       if (!cat) return;
       words = cat.words.map(w => {
         if (!w.id) w.id = Date.now() + Math.random().toString(16).slice(2);
-        w.failCount = w.failCount || 0; w.correctCount = w.correctCount || 0;
+        w.failCount = w.failCount || 0; 
+        w.correctCount = w.correctCount || 0;
         return w;
       });
       wordFieldsOrder = cat.wordFieldsOrder || [];
@@ -903,16 +989,27 @@
         wordFields = keys.map(k => ({ key: k, label: k, type: "text", required: false }));
       }
       generarFormularioDinamico(wordFields);
-      updateFieldsList(); updateFrontFieldOptions(); currentPage = 1; renderizarTabla();
+      updateFieldsList(); 
+      updateFrontFieldOptions(); 
+      currentPage = 1; 
+      renderizarTabla();
+
       if (unsubGlobalHistory) unsubGlobalHistory();
       unsubGlobalHistory = subscribeGlobalHistoryForCategory(currentCategoryId);
+
       if (unsubPersonalizedLists) unsubPersonalizedLists();
       unsubPersonalizedLists = subscribeToPersonalizedLists();
       customPracticeList = [];
-      renderCustomPracticeTable(); renderCustomPracticeResultsHeader();
+      renderCustomPracticeTable(); 
+      renderCustomPracticeResultsHeader();
       renderCustomPracticeResultsBody(words);
-      currentIndex = 0; correctCount = 0; sessionPracticed = 0;
-      responses = []; currentStreak = 0; practiceSessionWords = [];
+
+      currentIndex = 0; 
+      correctCount = 0; 
+      sessionPracticed = 0;
+      responses = []; 
+      currentStreak = 0; 
+      practiceSessionWords = [];
     }
 
     function subscribeGlobalHistoryForCategory(catId) {
@@ -921,7 +1018,9 @@
       const colRef = collection(db, "users", user.uid, "categories", catId, "globalHistory");
       return onSnapshotQuery(colRef, (snapshot) => {
         globalHistory = [];
-        snapshot.forEach(docSnap => { globalHistory.push(docSnap.data()); });
+        snapshot.forEach(docSnap => {
+          globalHistory.push(docSnap.data());
+        });
         renderGlobalStats();
       }, (err) => { console.error("Error en globalHistory:", err); });
     }
@@ -929,7 +1028,10 @@
     async function resetCategoryStats(catId) {
       const cat = categories.find(c => c.id === catId);
       if (!cat) return;
-      cat.words.forEach(w => { w.failCount = 0; w.correctCount = 0; });
+      cat.words.forEach(w => {
+        w.failCount = 0;
+        w.correctCount = 0;
+      });
       const user = auth.currentUser;
       if (!user) return;
       try {
@@ -937,7 +1039,9 @@
         await setDoc(docRef, { words: cat.words }, { merge: true });
         const colRef = collection(db, "users", user.uid, "categories", catId, "globalHistory");
         const snap = await getDocs(colRef);
-        for (const d of snap.docs) { await deleteDoc(d.ref); }
+        for (const d of snap.docs) {
+          await deleteDoc(d.ref);
+        }
         alert(`Estadísticas reiniciadas para "${catId}".`);
       } catch (e) {
         console.error("Error reiniciando stats:", e);
@@ -950,7 +1054,9 @@
       if (!user) return;
       const colRef = collection(db, "users", user.uid, "categories", catId, "globalHistory");
       const snap = await getDocs(colRef);
-      for (const d of snap.docs) { await deleteDoc(d.ref); }
+      for (const d of snap.docs) {
+        await deleteDoc(d.ref);
+      }
       const docRef = doc(db, "users", user.uid, "categories", catId);
       await deleteDoc(docRef);
       if (currentCategoryId === catId) {
@@ -967,17 +1073,25 @@
       const ddEstadisticas = document.getElementById("caratulaDropdownEstadisticas");
       const ddNuevas = document.getElementById("caratulaDropdownNuevas");
       const selects = [ddPracticar, ddGestionar, ddEstadisticas, ddNuevas].filter(Boolean);
+
       selects.forEach(sel => {
         sel.innerHTML = "";
         categories.forEach(cat => {
           const opt = document.createElement("option");
           opt.value = cat.id;
           opt.textContent = cat.name;
-          if (cat.id === currentCategoryId) { opt.selected = true; }
+          if (cat.id === currentCategoryId) {
+            opt.selected = true;
+          }
           sel.appendChild(opt);
         });
-        sel.addEventListener("change", e => { selectCategoryById(e.target.value); });
-        if (sel.options.length === 1) { sel.selectedIndex = 0; selectCategoryById(sel.value); }
+        sel.addEventListener("change", e => {
+          selectCategoryById(e.target.value);
+        });
+        if (sel.options.length === 1) {
+          sel.selectedIndex = 0;
+          selectCategoryById(sel.value);
+        }
       });
       updateDropdownChecks();
     }
@@ -994,23 +1108,35 @@
 
     document.getElementById("confirmCaratulaPracticar").addEventListener("click", () => {
       const selectedCatId = document.getElementById("caratulaDropdownPracticar").value;
-      if (selectedCatId) { selectCategoryById(selectedCatId); }
-      else { alert("Por favor, selecciona una carátula."); }
+      if (selectedCatId) {
+        selectCategoryById(selectedCatId);
+      } else {
+        alert("Por favor, selecciona una carátula.");
+      }
     });
     document.getElementById("confirmCaratulaGestionar").addEventListener("click", () => {
       const selectedCatId = document.getElementById("caratulaDropdownGestionar").value;
-      if (selectedCatId) { selectCategoryById(selectedCatId); }
-      else { alert("Por favor, selecciona una carátula."); }
+      if (selectedCatId) {
+        selectCategoryById(selectedCatId);
+      } else {
+        alert("Por favor, selecciona una carátula.");
+      }
     });
     document.getElementById("confirmCaratulaEstadisticas").addEventListener("click", () => {
       const selectedCatId = document.getElementById("caratulaDropdownEstadisticas").value;
-      if (selectedCatId) { selectCategoryById(selectedCatId); }
-      else { alert("Por favor, selecciona una carátula."); }
+      if (selectedCatId) {
+        selectCategoryById(selectedCatId);
+      } else {
+        alert("Por favor, selecciona una carátula.");
+      }
     });
     document.getElementById("confirmCaratulaNuevas").addEventListener("click", () => {
       const selectedCatId = document.getElementById("caratulaDropdownNuevas").value;
-      if (selectedCatId) { selectCategoryById(selectedCatId); }
-      else { alert("Por favor, selecciona una carátula."); }
+      if (selectedCatId) {
+        selectCategoryById(selectedCatId);
+      } else {
+        alert("Por favor, selecciona una carátula.");
+      }
     });
 
     function updateFrontFieldOptions() {
@@ -1056,9 +1182,14 @@
         label.textContent = field.label;
         label.setAttribute("for", field.key);
         div.appendChild(label);
+
         let input;
-        if (field.type === "textarea") { input = document.createElement("textarea"); }
-        else { input = document.createElement("input"); input.type = field.type; }
+        if (field.type === "textarea") {
+          input = document.createElement("textarea");
+        } else {
+          input = document.createElement("input");
+          input.type = field.type;
+        }
         input.id = field.key;
         input.name = field.key;
         input.placeholder = field.label;
@@ -1066,6 +1197,7 @@
         div.appendChild(input);
         form.appendChild(div);
       });
+
       const submitBtn = document.createElement("button");
       submitBtn.textContent = "Agregar Palabra";
       submitBtn.type = "submit";
@@ -1077,8 +1209,11 @@
         input.addEventListener("keydown", function(e) {
           if (e.key === "Enter") {
             e.preventDefault();
-            if (index < inputs.length - 1) { inputs[index+1].focus(); }
-            else { submitBtn.click(); }
+            if (index < inputs.length - 1) {
+              inputs[index+1].focus();
+            } else {
+              submitBtn.click();
+            }
           }
         });
       });
@@ -1093,6 +1228,7 @@
       if (!tbody || !thead) return;
       tbody.innerHTML = "";
       thead.innerHTML = "";
+
       if (wordFieldsOrder.length > 0) {
         const headerRow = document.createElement("tr");
         wordFieldsOrder.forEach(key => {
@@ -1108,6 +1244,7 @@
         headerRow.appendChild(thAcciones);
         thead.appendChild(headerRow);
       }
+
       const totalWords = words.length;
       const totalPages = Math.ceil(totalWords / pageSize);
       if (currentPage > totalPages) currentPage = totalPages < 1 ? 1 : totalPages;
@@ -1115,6 +1252,7 @@
       const start = (currentPage - 1) * pageSize;
       const end = start + pageSize;
       const wordsToRender = words.slice(start, end);
+
       wordsToRender.forEach((word, idx) => {
         const row = document.createElement("tr");
         wordFieldsOrder.forEach(key => {
@@ -1127,32 +1265,49 @@
           const btnEdit = document.createElement("button");
           btnEdit.textContent = "Editar";
           btnEdit.onclick = () => editarPalabra(start + idx);
+
           const btnDelete = document.createElement("button");
           btnDelete.textContent = "Borrar";
           btnDelete.onclick = () => borrarPalabra(start + idx);
+
           tdAcciones.appendChild(btnEdit);
           tdAcciones.appendChild(btnDelete);
           row.appendChild(tdAcciones);
         }
         tbody.appendChild(row);
       });
+
       const paginationInfo = document.getElementById("paginationInfo");
-      if (paginationInfo) { paginationInfo.textContent = `Página ${currentPage} de ${totalPages || 1}`; }
+      if (paginationInfo) {
+        paginationInfo.textContent = `Página ${currentPage} de ${totalPages || 1}`;
+      }
     }
 
-    document.getElementById("btnPrevPage").addEventListener("click", () => { currentPage--; renderizarTabla(); });
-    document.getElementById("btnNextPage").addEventListener("click", () => { currentPage++; renderizarTabla(); });
+    document.getElementById("btnPrevPage").addEventListener("click", () => {
+      currentPage--;
+      renderizarTabla();
+    });
+    document.getElementById("btnNextPage").addEventListener("click", () => {
+      currentPage++;
+      renderizarTabla();
+    });
 
     document.getElementById("wordSearch").addEventListener("input", () => {
       const term = document.getElementById("wordSearch").value.toLowerCase();
-      if (term === "") { currentPage = 1; renderizarTabla(); return; }
+      if (term === "") {
+        currentPage = 1;
+        renderizarTabla();
+        return;
+      }
       const filtered = words.map((word, index) => ({ word, index }))
         .filter(item => wordFieldsOrder.some(key => String(item.word[key] || "").toLowerCase().includes(term)));
+
       const tbody = document.querySelector("#wordsTable tbody");
       const thead = document.querySelector("#wordsTable thead");
       if (!tbody || !thead) return;
       tbody.innerHTML = "";
       thead.innerHTML = "";
+
       if (wordFieldsOrder.length > 0) {
         const headerRow = document.createElement("tr");
         wordFieldsOrder.forEach(key => {
@@ -1168,6 +1323,7 @@
         headerRow.appendChild(thAcciones);
         thead.appendChild(headerRow);
       }
+
       filtered.forEach(item => {
         const row = document.createElement("tr");
         wordFieldsOrder.forEach(key => {
@@ -1180,22 +1336,30 @@
           const btnEdit = document.createElement("button");
           btnEdit.textContent = "Editar";
           btnEdit.onclick = () => editarPalabra(item.index);
+
           const btnDelete = document.createElement("button");
           btnDelete.textContent = "Borrar";
           btnDelete.onclick = () => borrarPalabra(item.index);
+
           tdAcciones.appendChild(btnEdit);
           tdAcciones.appendChild(btnDelete);
           row.appendChild(tdAcciones);
         }
         tbody.appendChild(row);
       });
+
       const paginationInfo = document.getElementById("paginationInfo");
-      if (paginationInfo) { paginationInfo.textContent = `Mostrando ${filtered.length} resultado(s)`; }
+      if (paginationInfo) {
+        paginationInfo.textContent = `Mostrando ${filtered.length} resultado(s)`;
+      }
     });
 
     document.getElementById("wordForm").addEventListener("submit", function(e) {
       e.preventDefault();
-      if (!currentCategoryId) { alert("Primero selecciona una carátula."); return; }
+      if (!currentCategoryId) {
+        alert("Primero selecciona una carátula.");
+        return;
+      }
       let nuevaPalabra = {};
       wordFields.forEach(field => {
         const input = document.getElementById(field.key);
@@ -1204,7 +1368,9 @@
       });
       nuevaPalabra.failCount = 0;
       nuevaPalabra.correctCount = 0;
-      if (!nuevaPalabra.id) { nuevaPalabra.id = Date.now() + Math.random().toString(16).slice(2); }
+      if (!nuevaPalabra.id) {
+        nuevaPalabra.id = Date.now() + Math.random().toString(16).slice(2);
+      }
       words.push(nuevaPalabra);
       saveWords();
       currentPage = Math.ceil(words.length / pageSize);
@@ -1222,9 +1388,14 @@
         label.textContent = field.label;
         label.setAttribute("for", "edit_" + field.key);
         div.appendChild(label);
+
         let input;
-        if (field.type === "textarea") { input = document.createElement("textarea"); }
-        else { input = document.createElement("input"); input.type = field.type; }
+        if (field.type === "textarea") {
+          input = document.createElement("textarea");
+        } else {
+          input = document.createElement("input");
+          input.type = field.type;
+        }
         input.id = "edit_" + field.key;
         input.name = field.key;
         input.value = word[field.key] || "";
@@ -1250,7 +1421,9 @@
         const input = document.getElementById("edit_" + field.key);
         words[currentEditIndex][field.key] = input.value;
       });
-      if (!words[currentEditIndex].id) { words[currentEditIndex].id = Date.now() + Math.random().toString(16).slice(2); }
+      if (!words[currentEditIndex].id) {
+        words[currentEditIndex].id = Date.now() + Math.random().toString(16).slice(2);
+      }
       saveWords();
       renderizarTabla();
       document.getElementById("editModal").style.display = "none";
@@ -1281,11 +1454,15 @@
         const docRef = doc(db, "users", user.uid, "categories", catId);
         const sanitizedWords = wordsArray.map(w => {
           const newWord = {};
-          for (let k in w) { newWord[k] = w[k] == undefined ? null : w[k]; }
+          for (let k in w) {
+            newWord[k] = w[k] == undefined ? null : w[k];
+          }
           return newWord;
         });
         await setDoc(docRef, { words: sanitizedWords, wordFieldsOrder: fieldsOrder }, { merge: true });
-      } catch (err) { console.error("Error guardando carátula:", err); }
+      } catch (err) {
+        console.error("Error guardando carátula:", err);
+      }
     }
 
     /********************************
@@ -1303,6 +1480,7 @@
         li.addEventListener("dragstart", handleDragStart);
         li.addEventListener("dragover", handleDragOver);
         li.addEventListener("drop", handleDrop);
+
         const btnRemove = document.createElement("button");
         btnRemove.textContent = "Eliminar";
         btnRemove.onclick = () => {
@@ -1345,14 +1523,26 @@
     });
     document.getElementById("fieldsForm").addEventListener("submit", function(e) {
       e.preventDefault();
-      if (!currentCategoryId) { alert("Primero selecciona una carátula."); return; }
+      if (!currentCategoryId) {
+        alert("Primero selecciona una carátula.");
+        return;
+      }
       const key = document.getElementById("fieldKey").value.trim();
       const label = document.getElementById("fieldLabel").value.trim();
       const type = document.getElementById("fieldType").value;
       const required = document.getElementById("fieldRequired").checked;
-      if (key === "" || label === "") { alert("Por favor, ingresa todos los datos."); return; }
-      if (key.indexOf(" ") >= 0) { alert("La clave no debe contener espacios."); return; }
-      if (wordFields.some(f => f.key === key)) { alert("Ya existe un campo con esa clave."); return; }
+      if (key === "" || label === "") {
+        alert("Por favor, ingresa todos los datos.");
+        return;
+      }
+      if (key.indexOf(" ") >= 0) {
+        alert("La clave no debe contener espacios.");
+        return;
+      }
+      if (wordFields.some(f => f.key === key)) {
+        alert("Ya existe un campo con esa clave.");
+        return;
+      }
       const newField = { key, label, type, required };
       wordFields.push(newField);
       wordFieldsOrder.push(key);
@@ -1378,13 +1568,19 @@
       URL.revokeObjectURL(url);
     };
     document.getElementById("exportData").addEventListener("click", window.exportData);
-    document.getElementById("importData").addEventListener("change", (e) => { fileToImport = e.target.files[0] || null; });
+    document.getElementById("importData").addEventListener("change", (e) => {
+      fileToImport = e.target.files[0] || null;
+    });
     document.getElementById("confirmUpload").addEventListener("click", async () => {
-      if (!fileToImport) { alert("No se ha seleccionado ningún archivo para importar."); return; }
+      if (!fileToImport) {
+        alert("No se ha seleccionado ningún archivo para importar.");
+        return;
+      }
       const uploadProgressContainer = document.getElementById("uploadProgressContainer");
       const uploadProgressBar = document.getElementById("uploadProgressBar");
       uploadProgressContainer.style.display = "block";
       uploadProgressBar.style.width = "0%";
+
       const fileName = fileToImport.name.toLowerCase();
       const reader = new FileReader();
       reader.onprogress = function(evt) {
@@ -1395,25 +1591,44 @@
       };
       reader.onload = function(evt) {
         uploadProgressBar.style.width = "100%";
-        setTimeout(() => { uploadProgressContainer.style.display = "none"; }, 500);
+        setTimeout(() => {
+          uploadProgressContainer.style.display = "none";
+        }, 500);
+
         const data = evt.target.result;
         if (fileName.endsWith(".json")) {
-          try { const jsonContent = JSON.parse(data); importarDatosLeidos(jsonContent); }
-          catch (err) { alert("Error parsing JSON: " + err); }
+          try {
+            const jsonContent = JSON.parse(data);
+            importarDatosLeidos(jsonContent);
+          } catch (err) {
+            alert("Error parsing JSON: " + err);
+          }
         } else if (fileName.endsWith(".csv")) {
-          Papa.parse(data, { header: true, complete: function(results) { importarDatosLeidos(results.data); } });
+          Papa.parse(data, {
+            header: true,
+            complete: function(results) {
+              importarDatosLeidos(results.data);
+            }
+          });
         } else if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) {
           const workbook = XLSX.read(data, { type: "array" });
           const sheetName = workbook.SheetNames[0];
           const sheet = workbook.Sheets[sheetName];
           const sheetData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
           importarDatosLeidos(sheetData);
-        } else { alert("Formato de archivo no soportado. Usa .json, .csv, .xls o .xlsx"); }
+        } else {
+          alert("Formato de archivo no soportado. Usa .json, .csv, .xls o .xlsx");
+        }
       };
-      if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) { reader.readAsArrayBuffer(fileToImport); }
-      else { reader.readAsText(fileToImport); }
+      if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) {
+        reader.readAsArrayBuffer(fileToImport);
+      } else {
+        reader.readAsText(fileToImport);
+      }
     });
-    document.getElementById("appendData").addEventListener("click", () => { document.getElementById("appendFile").click(); });
+    document.getElementById("appendData").addEventListener("click", () => {
+      document.getElementById("appendFile").click();
+    });
     document.getElementById("appendFile").addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1422,23 +1637,40 @@
       reader.onload = function(evt) {
         const data = evt.target.result;
         if (fileName.endsWith(".json")) {
-          try { const jsonContent = JSON.parse(data); fusionarDatos(jsonContent); }
-          catch (err) { alert("Error parsing JSON: " + err); }
+          try {
+            const jsonContent = JSON.parse(data);
+            fusionarDatos(jsonContent);
+          } catch (err) {
+            alert("Error parsing JSON: " + err);
+          }
         } else if (fileName.endsWith(".csv")) {
-          Papa.parse(data, { header: true, complete: function(results) { fusionarDatos(results.data); } });
+          Papa.parse(data, {
+            header: true,
+            complete: function(results) {
+              fusionarDatos(results.data);
+            }
+          });
         } else if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) {
           const workbook = XLSX.read(data, { type: "array" });
           const sheetName = workbook.SheetNames[0];
           const sheet = workbook.Sheets[sheetName];
           const sheetData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
           fusionarDatos(sheetData);
-        } else { alert("Formato de archivo no soportado."); }
+        } else {
+          alert("Formato de archivo no soportado.");
+        }
       };
-      if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) { reader.readAsArrayBuffer(file); }
-      else { reader.readAsText(file); }
+      if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) {
+        reader.readAsArrayBuffer(file);
+      } else {
+        reader.readAsText(file);
+      }
     });
     function importarDatosLeidos(importArray) {
-      if (!Array.isArray(importArray)) { alert("El archivo no contiene un array de datos válido."); return; }
+      if (!Array.isArray(importArray)) {
+        alert("El archivo no contiene un array de datos válido.");
+        return;
+      }
       words = importArray.map(obj => ({
         ...obj,
         id: obj.id || (Date.now() + Math.random().toString(16).slice(2)),
@@ -1452,18 +1684,34 @@
         wordFieldsOrder = keys;
         wordFields = keys.map(k => ({ key: k, label: k, type: "text", required: false }));
       }
-      saveWords(); renderizarTabla(); generarFormularioDinamico(wordFields);
-      updateFieldsList(); updateFrontFieldOptions();
+      saveWords();
+      renderizarTabla();
+      generarFormularioDinamico(wordFields);
+      updateFieldsList();
+      updateFrontFieldOptions();
       alert("Datos importados correctamente.");
     }
     function fusionarDatos(importArray) {
-      if (!Array.isArray(importArray)) { alert("El archivo no contiene un array de datos válido."); return; }
+      if (!Array.isArray(importArray)) {
+        alert("El archivo no contiene un array de datos válido.");
+        return;
+      }
       importArray.forEach(obj => {
         const existingIndex = words.findIndex(w => w.id === obj.id);
         if (existingIndex >= 0) {
-          words[existingIndex] = { ...words[existingIndex], ...obj, failCount: obj.failCount || 0, correctCount: obj.correctCount || 0 };
+          words[existingIndex] = {
+            ...words[existingIndex],
+            ...obj,
+            failCount: obj.failCount || 0,
+            correctCount: obj.correctCount || 0
+          };
         } else {
-          words.push({ ...obj, id: obj.id || (Date.now() + Math.random().toString(16).slice(2)), failCount: obj.failCount || 0, correctCount: obj.correctCount || 0 });
+          words.push({
+            ...obj,
+            id: obj.id || (Date.now() + Math.random().toString(16).slice(2)),
+            failCount: obj.failCount || 0,
+            correctCount: obj.correctCount || 0
+          });
         }
       });
       if (words.length > 0 && wordFieldsOrder.length === 0) {
@@ -1473,8 +1721,11 @@
         wordFieldsOrder = keys;
         wordFields = keys.map(k => ({ key: k, label: k, type: "text", required: false }));
       }
-      saveWords(); renderizarTabla(); generarFormularioDinamico(wordFields);
-      updateFieldsList(); updateFrontFieldOptions();
+      saveWords();
+      renderizarTabla();
+      generarFormularioDinamico(wordFields);
+      updateFieldsList();
+      updateFrontFieldOptions();
       alert("Datos fusionados correctamente.");
     }
 
@@ -1493,24 +1744,41 @@
     const progressCount = document.getElementById("progressCount");
 
     btnStartPractice.addEventListener("click", async () => {
-      if (!currentCategoryId) { alert("Primero selecciona una carátula."); return; }
+      if (!currentCategoryId) {
+        alert("Primero selecciona una carátula.");
+        return;
+      }
       await startPracticeSession();
     });
 
     async function startPracticeSession() {
       const mode = document.getElementById("practiceMode").value;
-      if (mode === "dificultad") { await syncStatsWithGlobalHistory(); }
-      currentIndex = 0; correctCount = 0; sessionPracticed = 0; responses = []; currentStreak = 0;
+      if (mode === "dificultad") {
+        await syncStatsWithGlobalHistory();
+      }
+      currentIndex = 0; 
+      correctCount = 0; 
+      sessionPracticed = 0; 
+      responses = []; 
+      currentStreak = 0;
       updateProgress();
-      if (mode === "normal") { weightedMode = false; practiceSessionWords = [...words]; }
-      else if (mode === "aleatorio") { weightedMode = false; practiceSessionWords = shuffleArray([...words]); }
-      else if (mode === "dificultad") {
+
+      if (mode === "normal") {
+        weightedMode = false;
+        practiceSessionWords = [...words];
+      } else if (mode === "aleatorio") {
+        weightedMode = false;
+        practiceSessionWords = shuffleArray([...words]);
+      } else if (mode === "dificultad") {
         weightedMode = true;
         let filtered = words.filter(card => {
           let grade = obtenerCalificacion(card);
           return grade === "C" || grade === "D" || grade === "F";
         });
-        if (filtered.length === 0) { alert("No hay tarjetas para repasar."); return; }
+        if (filtered.length === 0) {
+          alert("No hay tarjetas para repasar.");
+          return;
+        }
         practiceSessionWords = weightedShuffle(filtered);
       }
       showCard();
@@ -1521,20 +1789,29 @@
         let pct = (currentIndex / practiceSessionWords.length) * 100;
         progressBar.style.width = `${pct}%`;
         progressCount.textContent = `Progreso: ${currentIndex} / ${practiceSessionWords.length}`;
-      } else { progressBar.style.width = "0%"; progressCount.textContent = ""; }
+      } else {
+        progressBar.style.width = "0%";
+        progressCount.textContent = "";
+      }
     }
 
     function showCard() {
       updateProgress();
-      if (currentIndex >= practiceSessionWords.length) { return; }
-      btnBien.style.border = ""; btnMal.style.border = "";
+      if (currentIndex >= practiceSessionWords.length) {
+        return;
+      }
+      btnBien.style.border = "";
+      btnMal.style.border = "";
       const card = practiceSessionWords[currentIndex];
       const frontField = document.getElementById("frontField").value;
+
       flashcardDiv.style.borderLeft = "10px solid " + obtenerColor(card);
       flashcardDiv.style.borderRight = "10px solid " + obtenerColor(card);
       flashcardDiv.style.borderTop = "4px solid transparent";
       flashcardDiv.style.borderBottom = "4px solid transparent";
+
       flashcardDiv.textContent = card[frontField] || "?";
+
       if (responses[currentIndex]) {
         detailsDiv.innerHTML = renderCardDetails(card, frontField);
         detailsDiv.classList.remove("hidden");
@@ -1564,29 +1841,47 @@
     async function responder(correcto) {
       if (currentIndex >= practiceSessionWords.length) return;
       if (responses[currentIndex]) return;
+
       const card = practiceSessionWords[currentIndex];
       const frontField = document.getElementById("frontField").value;
       detailsDiv.innerHTML = renderCardDetails(card, frontField);
       detailsDiv.classList.remove("hidden");
       sessionPracticed++;
+
       let respText = "";
       if (correcto) {
-        correctCount++; respText = "Correcto"; responses[currentIndex] = "Correcto";
-        flashcardDiv.style.borderTop = "4px solid green"; flashcardDiv.style.borderBottom = "4px solid green";
-        btnBien.style.border = "2px solid green"; currentStreak++;
+        correctCount++; 
+        respText = "Correcto";
+        responses[currentIndex] = "Correcto";
+        flashcardDiv.style.borderTop = "4px solid green";
+        flashcardDiv.style.borderBottom = "4px solid green";
+        btnBien.style.border = "2px solid green";
+        currentStreak++;
         card.correctCount = (card.correctCount || 0) + 1;
       } else {
-        respText = "Incorrecto"; card.failCount = (card.failCount || 0) + 1;
-        responses[currentIndex] = "Incorrecto"; flashcardDiv.style.borderTop = "4px solid red";
-        flashcardDiv.style.borderBottom = "4px solid red"; btnMal.style.border = "2px solid red";
+        respText = "Incorrecto";
+        card.failCount = (card.failCount || 0) + 1;
+        responses[currentIndex] = "Incorrecto";
+        flashcardDiv.style.borderTop = "4px solid red";
+        flashcardDiv.style.borderBottom = "4px solid red";
+        btnMal.style.border = "2px solid red";
         currentStreak = 0;
       }
-      if (!card.id) { card.id = Date.now() + Math.random().toString(16).slice(2); }
+
+      if (!card.id) {
+        card.id = Date.now() + Math.random().toString(16).slice(2);
+      }
       addGlobalHistoryEntry(card, card[frontField], respText)
         .then(() => console.log("Historial guardado"))
         .catch(err => console.error("Error en addGlobalHistoryEntry:", err));
+
       saveWords();
-      setTimeout(() => { flashcardDiv.style.borderTop = "4px solid transparent"; flashcardDiv.style.borderBottom = "4px solid transparent"; currentIndex++; showCard(); }, settings.feedbackDelay);
+      setTimeout(() => {
+        flashcardDiv.style.borderTop = "4px solid transparent";
+        flashcardDiv.style.borderBottom = "4px solid transparent";
+        currentIndex++;
+        showCard();
+      }, settings.feedbackDelay);
     }
 
     btnBien.addEventListener("click", () => responder(true));
@@ -1598,6 +1893,7 @@
         const focusBtnMostrar = document.getElementById("focusBtnMostrar");
         const focusBtnBien = document.getElementById("focusBtnBien");
         const focusBtnMal = document.getElementById("focusBtnMal");
+
         if (!focusBtnMostrar.classList.contains("hidden") && e.key === settings.keyMostrar) {
           focusBtnMostrar.click();
           return;
@@ -1612,7 +1908,10 @@
         }
       } else if (document.getElementById("sectionPracticar").classList.contains("active")) {
         if (!responses[currentIndex] && !btnMostrar.classList.contains("hidden")) {
-          if (e.key === settings.keyMostrar) { btnMostrar.click(); return; }
+          if (e.key === settings.keyMostrar) {
+            btnMostrar.click();
+            return;
+          }
         }
         if (!responses[currentIndex] && !btnBien.classList.contains("hidden")) {
           if (e.key === settings.keyCorrect) responder(true);
@@ -1632,17 +1931,26 @@
       let history = JSON.parse(localStorage.getItem("sessionHistory")) || [];
       history.push(sessionData);
       localStorage.setItem("sessionHistory", JSON.stringify(history));
-      practiceSessionWords = []; currentIndex = 0; correctCount = 0;
-      sessionPracticed = 0; responses = []; currentStreak = 0;
+
+      practiceSessionWords = [];
+      currentIndex = 0; 
+      correctCount = 0;
+      sessionPracticed = 0; 
+      responses = []; 
+      currentStreak = 0;
       alert("Sesión finalizada.");
       showSection("sectionPracticar");
     });
 
     btnResetSession.addEventListener("click", () => {
-      currentIndex = 0; correctCount = 0; sessionPracticed = 0;
-      responses = []; currentStreak = 0;
+      currentIndex = 0; 
+      correctCount = 0; 
+      sessionPracticed = 0;
+      responses = []; 
+      currentStreak = 0;
       flashcardDiv.classList.remove("hidden");
-      updateProgress(); showCard();
+      updateProgress(); 
+      showCard();
     });
 
     flashcardDiv.addEventListener("click", () => {
@@ -1657,14 +1965,20 @@
       if (!user || !currentCategoryId) return;
       try {
         await addDoc(collection(db, "users", user.uid, "categories", currentCategoryId, "globalHistory"), {
-          date: new Date().toISOString(), id: card.id,
-          campoFrontal: frontValue, pinyin: card.pinyin || "",
+          date: new Date().toISOString(),
+          id: card.id,
+          campoFrontal: frontValue,
+          pinyin: card.pinyin || "",
           respuesta: respText
         });
-      } catch (e) { console.error("Error en globalHistory:", e); }
+      } catch (e) {
+        console.error("Error en globalHistory:", e);
+      }
     }
 
-    async function syncStatsWithGlobalHistory() { /* Sin cambios */ }
+    async function syncStatsWithGlobalHistory() {
+      // Mantener si tienes lógica extra para sincronizar
+    }
 
     /********************************
      * ESTADÍSTICAS
@@ -1689,20 +2003,45 @@
       else if (porcentajeAciertos >= 60) return "D";
       else return "F";
     }
+
+    /* <-- NUEVO: Ajustamos para que siempre se muestre el encabezado y, si no hay datos, 
+       se muestre una fila con "No hay datos disponibles" (colspan=7). */
     function renderGlobalStats() {
+      const failTableBody = document.querySelector("#failTable tbody");
+      if (!failTableBody) return;
+      failTableBody.innerHTML = "";
+
+      // Si no hay historial global, mostramos una fila "sin datos" pero dejamos el thead visible
       if (!globalHistory || globalHistory.length === 0) {
         const globalStatsEl = document.getElementById("globalStats");
-        if (globalStatsEl) { globalStatsEl.textContent = "No hay estadísticas globales disponibles para esta carátula."; }
-        const failTableBody = document.querySelector("#failTable tbody");
-        if (failTableBody) failTableBody.innerHTML = "";
+        if (globalStatsEl) {
+          globalStatsEl.textContent = "No hay estadísticas globales disponibles para esta carátula.";
+        }
+        const noDataRow = document.createElement("tr");
+        const noDataCell = document.createElement("td");
+        noDataCell.colSpan = 7; // Tenemos 7 columnas
+        noDataCell.textContent = "No hay datos disponibles";
+        noDataRow.appendChild(noDataCell);
+        failTableBody.appendChild(noDataRow);
         return;
       }
+
       let statsMap = {};
       globalHistory.forEach(entry => {
         const id = entry.id;
-        if (!statsMap[id]) { statsMap[id] = { id, campoFrontal: entry.campoFrontal, failCount: 0, correctCount: 0 }; }
-        if (entry.respuesta === "Incorrecto") { statsMap[id].failCount++; }
-        else if (entry.respuesta === "Correcto") { statsMap[id].correctCount++; }
+        if (!statsMap[id]) {
+          statsMap[id] = {
+            id,
+            campoFrontal: entry.campoFrontal,
+            failCount: 0,
+            correctCount: 0
+          };
+        }
+        if (entry.respuesta === "Incorrecto") {
+          statsMap[id].failCount++;
+        } else if (entry.respuesta === "Correcto") {
+          statsMap[id].correctCount++;
+        }
       });
       let statsArray = Object.values(statsMap);
       statsArray.forEach(obj => {
@@ -1710,28 +2049,32 @@
         obj.accuracy = obj.total > 0 ? ((obj.correctCount / obj.total) * 100).toFixed(2) + "%" : "0%";
         obj.calificacion = obj.total > 0 ? obtenerCalificacion(obj) : "-";
       });
+
       statsArray.sort((a, b) => {
         let diff = 0;
         if (a[currentSortField] < b[currentSortField]) diff = -1;
         else if (a[currentSortField] > b[currentSortField]) diff = 1;
         return currentSortOrder === 'asc' ? diff : -diff;
       });
+
       const globalStatsEl = document.getElementById("globalStats");
-      if (globalStatsEl) { globalStatsEl.textContent = `Total de palabras: ${words.length}`; }
-      const tbody = document.querySelector("#failTable tbody");
-      if (!tbody) return;
-      tbody.innerHTML = "";
+      if (globalStatsEl) {
+        globalStatsEl.textContent = `Total de palabras: ${words.length}`;
+      }
+
       statsArray.forEach(obj => {
         const row = document.createElement("tr");
-        row.innerHTML = 
-          `<td>${obj.campoFrontal}</td>
-          <td>${obj.failCount}</td>
-          <td>${obj.correctCount}</td>
-          <td>${obj.total}</td>
-          <td style="background-color: ${obtenerColor(obj)}">${obj.accuracy}</td>
-          <td style="background-color: ${obtenerColor(obj)}">${obj.calificacion}</td>
-          <td><button onclick="resetStatsForWord('${obj.id}')">Resetear</button></td>`;
-        tbody.appendChild(row);
+        /* <-- NUEVO: data-label en cada <td> para versión responsive */
+        row.innerHTML = `
+          <td data-label="Campo frontal">${obj.campoFrontal}</td>
+          <td data-label="Fallos">${obj.failCount}</td>
+          <td data-label="Aciertos">${obj.correctCount}</td>
+          <td data-label="Intentos Totales">${obj.total}</td>
+          <td data-label="Promedio de Acierto" style="background-color: ${obtenerColor(obj)}">${obj.accuracy}</td>
+          <td data-label="Calificación" style="background-color: ${obtenerColor(obj)}">${obj.calificacion}</td>
+          <td data-label="Resetear"><button onclick="resetStatsForWord('${obj.id}')">Resetear</button></td>
+        `;
+        failTableBody.appendChild(row);
       });
     }
 
@@ -1739,14 +2082,19 @@
       if (!currentCategoryId) return;
       if (!confirm("¿Deseas resetear las estadísticas para esta palabra?")) return;
       let w = words.find(x => x.id === wordId);
-      if (w) { w.failCount = 0; w.correctCount = 0; }
+      if (w) {
+        w.failCount = 0;
+        w.correctCount = 0;
+      }
       saveWords();
       const user = auth.currentUser;
       if (user) {
         const colRef = collection(db, "users", user.uid, "categories", currentCategoryId, "globalHistory");
         const snapshot = await getDocs(colRef);
         for (const docSnap of snapshot.docs) {
-          if (docSnap.data().id === wordId) { await deleteDoc(docSnap.ref); }
+          if (docSnap.data().id === wordId) {
+            await deleteDoc(docSnap.ref);
+          }
         }
       }
       alert("Estadísticas reiniciadas para la palabra.");
@@ -1759,32 +2107,47 @@
         th.addEventListener("click", () => {
           const field = th.getAttribute("data-field");
           if (!field) return;
-          if (currentSortField === field) { currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc'; }
-          else { currentSortField = field; currentSortOrder = 'asc'; }
+          if (currentSortField === field) {
+            currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+          } else {
+            currentSortField = field;
+            currentSortOrder = 'asc';
+          }
           renderGlobalStats();
         });
       });
     }
+
+    /* <-- NUEVO: Se agregan data-label a la tabla de sesión (#sessionDetailTable) */
     function renderSessionStats() {
       let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : "N/A";
-      if (!frontField && wordFieldsOrder.length > 0) { frontField = wordFieldsOrder[0]; }
+      if (!frontField && wordFieldsOrder.length > 0) {
+        frontField = wordFieldsOrder[0];
+      }
       const sessionStatsEl = document.getElementById("sessionStats");
       if (sessionStatsEl) {
-        sessionStatsEl.textContent = 
-          `Practicadas: ${sessionPracticed} | Aciertos: ${correctCount} |
-          Errores: ${sessionPracticed - correctCount} | Racha: ${currentStreak}`;
+        sessionStatsEl.textContent = `
+          Practicadas: ${sessionPracticed} | Aciertos: ${correctCount} |
+          Errores: ${sessionPracticed - correctCount} | Racha: ${currentStreak}
+        `;
       }
       const tbody = document.querySelector("#sessionDetailTable tbody");
       if (!tbody) return;
       tbody.innerHTML = "";
+
       responses.forEach((resp, i) => {
         const card = practiceSessionWords[i];
         const valorFrontal = card ? (card[frontField] || "-") : "-";
         const row = document.createElement("tr");
-        row.innerHTML = `<td>${i + 1}</td><td>${valorFrontal}</td><td>${resp}</td>`;
+        row.innerHTML = `
+          <td data-label="#">${i + 1}</td>
+          <td data-label="Campo frontal">${valorFrontal}</td>
+          <td data-label="Respuesta">${resp}</td>
+        `;
         tbody.appendChild(row);
       });
     }
+
     document.getElementById("tabGlobal").addEventListener("click", () => {
       document.getElementById("globalStatsContainer").classList.add("active");
       document.getElementById("sessionStatsContainer").classList.remove("active");
@@ -1805,7 +2168,9 @@
       const colRef = collection(db, "users", user.uid, "categories", currentCategoryId, "personalizedLists");
       return onSnapshot(colRef, (snapshot) => {
         personalizedLists = [];
-        snapshot.forEach(docSnap => { personalizedLists.push({ id: docSnap.id, ...docSnap.data() }); });
+        snapshot.forEach(docSnap => {
+          personalizedLists.push({ id: docSnap.id, ...docSnap.data() });
+        });
         renderPersonalizedLists();
       });
     }
@@ -1814,19 +2179,25 @@
       const container = document.getElementById("savedListsContainer");
       if (!container) return;
       container.innerHTML = "";
-      if (personalizedLists.length === 0) { container.innerHTML = "<p>No hay listas guardadas.</p>"; return; }
+      if (personalizedLists.length === 0) {
+        container.innerHTML = "<p>No hay listas guardadas.</p>";
+        return;
+      }
       const ul = document.createElement("ul");
       personalizedLists.forEach(list => {
         const li = document.createElement("li");
         const span = document.createElement("span");
         span.textContent = list.name;
         li.appendChild(span);
+
         const btnLoad = document.createElement("button");
         btnLoad.textContent = "Cargar";
         btnLoad.onclick = () => loadPersonalizedList(list.wordIds);
+
         const btnDelete = document.createElement("button");
         btnDelete.textContent = "Eliminar";
         btnDelete.onclick = () => deletePersonalizedList(list.id);
+
         li.appendChild(btnLoad);
         li.appendChild(btnDelete);
         ul.appendChild(li);
@@ -1897,6 +2268,7 @@
         const row = document.createElement("tr");
         const isSelected = customPracticeList.some(x => x.id === item.id);
         if(isSelected) row.classList.add("selected-result");
+
         wordFieldsOrder.forEach(k => {
           const td = document.createElement("td");
           td.textContent = item[k] || "";
@@ -1910,13 +2282,17 @@
         btnAgregar.onclick = () => addToCustomPractice(item);
         tdAccion.appendChild(btnAgregar);
         row.appendChild(tdAccion);
+
         tbody.appendChild(row);
       });
     }
 
     function addToCustomPractice(item) {
       const yaExiste = customPracticeList.find(x => x.id === item.id);
-      if (yaExiste) { alert("Esta palabra ya está en la lista personalizada."); return; }
+      if (yaExiste) {
+        alert("Esta palabra ya está en la lista personalizada.");
+        return;
+      }
       customPracticeList.push(item);
       renderCustomPracticeTable();
       renderCustomPracticeResultsBody(words);
@@ -1927,7 +2303,9 @@
       const thead = customPracticeTable.querySelector("thead");
       const tbody = customPracticeTable.querySelector("tbody");
       if (!thead || !tbody) return;
-      thead.innerHTML = ""; tbody.innerHTML = "";
+      thead.innerHTML = "";
+      tbody.innerHTML = "";
+
       if (wordFieldsOrder.length > 0) {
         const headerRow = document.createElement("tr");
         wordFieldsOrder.forEach(k => {
@@ -1943,6 +2321,7 @@
         headerRow.appendChild(thEliminar);
         thead.appendChild(headerRow);
       }
+
       customPracticeList.forEach((w, idx) => {
         const row = document.createElement("tr");
         row.classList.add("highlighted-row");
@@ -1969,8 +2348,9 @@
 
     customPracticeSearch.addEventListener("input", () => {
       const term = customPracticeSearch.value.toLowerCase();
-      if (term.trim() === "") { renderCustomPracticeResultsBody(words); }
-      else {
+      if (term.trim() === "") {
+        renderCustomPracticeResultsBody(words);
+      } else {
         const filtered = words.filter(w =>
           wordFieldsOrder.some(k => String(w[k] || "").toLowerCase().includes(term))
         );
@@ -1980,37 +2360,52 @@
 
     document.getElementById("btnSaveList").addEventListener("click", () => {
       const name = document.getElementById("listNameInput").value.trim();
-      if (!name) { alert("Ingresa un nombre para la lista."); return; }
-      if (customPracticeList.length === 0) { alert("La lista está vacía."); return; }
+      if (!name) {
+        alert("Ingresa un nombre para la lista.");
+        return;
+      }
+      if (customPracticeList.length === 0) {
+        alert("La lista está vacía.");
+        return;
+      }
       const wordIds = customPracticeList.map(w => w.id);
       savePersonalizedList(name, wordIds);
       document.getElementById("listNameInput").value = "";
     });
 
     startCustomPracticeBtn.addEventListener("click", () => {
-      if (customPracticeList.length === 0) { alert("No hay palabras seleccionadas para la práctica personalizada."); return; }
+      if (customPracticeList.length === 0) {
+        alert("No hay palabras seleccionadas para la práctica personalizada.");
+        return;
+      }
       startCustomPracticeSession();
     });
 
     async function startCustomPracticeSession() {
-      currentIndex = 0; correctCount = 0; sessionPracticed = 0; responses = []; currentStreak = 0;
-      weightedMode = false; practiceSessionWords = [...customPracticeList];
+      currentIndex = 0; 
+      correctCount = 0; 
+      sessionPracticed = 0; 
+      responses = []; 
+      currentStreak = 0;
+      weightedMode = false;
+      practiceSessionWords = [...customPracticeList];
       alert("¡Práctica personalizada iniciada! Ve a la sección 'Practicar' para usarla.");
-      showSection("sectionPracticar"); showCard();
+      showSection("sectionPracticar");
+      showCard();
     }
 
     /********************************
      * FOCUS MODE (POP UP)
      ********************************/
-    // Inicia Focus Mode usando las palabras seleccionadas (al menos focusTestSize)
     function startFocusModeSession() {
       if (customPracticeList.length < settings.focusTestSize) {
         alert("Necesitas al menos " + settings.focusTestSize + " palabras para Focus Mode.");
         return;
       }
       focusCards = customPracticeList.slice(0, settings.focusTestSize);
-      focusBlockIndex = 0; focusPhase = "memorization"; focusCurrentIndex = 0;
-      // Actualiza ajustes de Focus Mode
+      focusBlockIndex = 0; 
+      focusPhase = "memorization"; 
+      focusCurrentIndex = 0;
       settings.focusBlockSize = parseInt(document.getElementById("focusBlockSize").value);
       settings.focusTestSize = parseInt(document.getElementById("focusTestSize").value);
       openFocusModal();
@@ -2019,19 +2414,22 @@
 
     function runMemorizationPhase() {
       document.getElementById("focusPhaseTitle").textContent = "Memorización - Bloque " + (focusBlockIndex + 1);
-      focusPhase = "memorization"; focusCurrentIndex = 0;
+      focusPhase = "memorization";
+      focusCurrentIndex = 0;
       showFocusCard();
     }
 
     function runTestPhase() {
       document.getElementById("focusPhaseTitle").textContent = "Test - Bloque " + (focusBlockIndex + 1);
-      focusPhase = "test"; focusCurrentIndex = 0;
+      focusPhase = "test";
+      focusCurrentIndex = 0;
       showFocusCard();
     }
 
     function runFinalTestPhase() {
       document.getElementById("focusPhaseTitle").textContent = "Test Final - Todas las Palabras";
-      focusPhase = "finalTest"; focusCurrentIndex = 0;
+      focusPhase = "finalTest";
+      focusCurrentIndex = 0;
       showFocusCard();
     }
 
@@ -2042,27 +2440,40 @@
         let blockStart = focusBlockIndex * settings.focusBlockSize;
         let currentBlock = focusCards.slice(blockStart, blockStart + settings.focusBlockSize);
         if (focusCurrentIndex >= currentBlock.length) {
-          if (focusPhase === "memorization") { runTestPhase(); return; }
-          else if (focusPhase === "test") {
+          if (focusPhase === "memorization") {
+            runTestPhase();
+            return;
+          } else if (focusPhase === "test") {
             focusBlockIndex++;
-            if (focusBlockIndex * settings.focusBlockSize < focusCards.length) { runMemorizationPhase(); }
-            else { runFinalTestPhase(); }
+            if (focusBlockIndex * settings.focusBlockSize < focusCards.length) {
+              runMemorizationPhase();
+            } else {
+              runFinalTestPhase();
+            }
             return;
           }
-        } else { card = currentBlock[focusCurrentIndex]; }
+        } else {
+          card = currentBlock[focusCurrentIndex];
+        }
       } else if (focusPhase === "finalTest") {
-        if (focusCurrentIndex >= focusCards.length) { alert("¡Focus Mode completado!"); closeFocusModal(); return; }
-        else { card = focusCards[focusCurrentIndex]; }
+        if (focusCurrentIndex >= focusCards.length) {
+          alert("¡Focus Mode completado!");
+          closeFocusModal();
+          return;
+        } else {
+          card = focusCards[focusCurrentIndex];
+        }
       }
       let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : (wordFieldsOrder[0] || "");
       let flashcard = document.getElementById("focusFlashcard");
+
       flashcard.style.borderLeft = "10px solid " + obtenerColor(card);
       flashcard.style.borderRight = "10px solid " + obtenerColor(card);
       flashcard.style.borderTop = "4px solid transparent";
       flashcard.style.borderBottom = "4px solid transparent";
       flashcard.textContent = card[frontField] || "?";
+
       if (focusPhase === "memorization") {
-        // En memorization se muestra el detalle completo junto con el botón de Confirmar Memorización
         document.getElementById("focusDetails").innerHTML = renderCardDetails(card, frontField);
         document.getElementById("focusDetails").classList.remove("hidden");
         document.getElementById("btnConfirmMemorization").classList.remove("hidden");
@@ -2070,7 +2481,6 @@
         document.getElementById("focusBtnBien").classList.add("hidden");
         document.getElementById("focusBtnMal").classList.add("hidden");
       } else {
-        // En test o finalTest solo se muestra el frente inicialmente; se activa el botón "Mostrar"
         document.getElementById("focusDetails").classList.add("hidden");
         document.getElementById("btnConfirmMemorization").classList.add("hidden");
         document.getElementById("focusBtnMostrar").classList.remove("hidden");
@@ -2090,19 +2500,23 @@
       if (focusPhase === "memorization") {
         focusCurrentIndex++;
         let blockSize = settings.focusBlockSize;
-        if (focusCurrentIndex >= blockSize) { runTestPhase(); }
-        else { showFocusCard(); }
+        if (focusCurrentIndex >= blockSize) {
+          runTestPhase();
+        } else {
+          showFocusCard();
+        }
       }
     });
 
-    // En fase de test, se utiliza un botón Mostrar para revelar el detalle
     document.getElementById("focusBtnMostrar").addEventListener("click", () => {
       let card;
       if (focusPhase === "test") {
         let blockStart = focusBlockIndex * settings.focusBlockSize;
         let currentBlock = focusCards.slice(blockStart, blockStart + settings.focusBlockSize);
         card = currentBlock[focusCurrentIndex];
-      } else if (focusPhase === "finalTest") { card = focusCards[focusCurrentIndex]; }
+      } else if (focusPhase === "finalTest") {
+        card = focusCards[focusCurrentIndex];
+      }
       let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : (wordFieldsOrder[0] || "");
       document.getElementById("focusDetails").innerHTML = renderCardDetails(card, frontField);
       document.getElementById("focusDetails").classList.remove("hidden");
@@ -2117,10 +2531,19 @@
       if (focusCurrentIndex >= total) {
         if (focusPhase === "test") {
           focusBlockIndex++;
-          if (focusBlockIndex * settings.focusBlockSize < focusCards.length) { runMemorizationPhase(); }
-          else { runFinalTestPhase(); }
-        } else if (focusPhase === "finalTest") { alert("¡Focus Mode completado!"); closeFocusModal(); return; }
-      } else { showFocusCard(); }
+          if (focusBlockIndex * settings.focusBlockSize < focusCards.length) {
+            runMemorizationPhase();
+          } else {
+            runFinalTestPhase();
+          }
+        } else if (focusPhase === "finalTest") {
+          alert("¡Focus Mode completado!");
+          closeFocusModal();
+          return;
+        }
+      } else {
+        showFocusCard();
+      }
     });
 
     document.getElementById("focusBtnMal").addEventListener("click", () => {
@@ -2129,23 +2552,35 @@
       showFocusCard();
     });
 
-    document.getElementById("btnExitFocusMode").addEventListener("click", () => { closeFocusModal(); });
+    document.getElementById("btnExitFocusMode").addEventListener("click", () => {
+      closeFocusModal();
+    });
 
-    function openFocusModal() { document.getElementById("focusModeModal").style.display = "block"; }
-    function closeFocusModal() { document.getElementById("focusModeModal").style.display = "none"; }
+    function openFocusModal() {
+      document.getElementById("focusModeModal").style.display = "block";
+    }
+    function closeFocusModal() {
+      document.getElementById("focusModeModal").style.display = "none";
+    }
 
-    // Asigna el evento al botón Focus Mode en la sección Aprendizaje
     document.getElementById("btnFocusMode").addEventListener("click", startFocusModeSession);
 
     /********************************
      * AJUSTES
      ********************************/
     function applyTheme() {
-      if (document.getElementById("darkTheme").checked) { document.body.classList.add("dark-theme"); settings.darkTheme = true; }
-      else { document.body.classList.remove("dark-theme"); settings.darkTheme = false; }
+      if (document.getElementById("darkTheme").checked) {
+        document.body.classList.add("dark-theme");
+        settings.darkTheme = true;
+      } else {
+        document.body.classList.remove("dark-theme");
+        settings.darkTheme = false;
+      }
       saveSettings();
     }
-    function saveSettings() { localStorage.setItem("settings", JSON.stringify(settings)); }
+    function saveSettings() {
+      localStorage.setItem("settings", JSON.stringify(settings));
+    }
     function loadSettings() {
       const stored = localStorage.getItem("settings");
       if (stored) {
@@ -2178,21 +2613,30 @@
       settings.newWordsCount = parseInt(document.getElementById("newWordsCount").value);
       settings.focusBlockSize = parseInt(document.getElementById("focusBlockSize").value);
       settings.focusTestSize = parseInt(document.getElementById("focusTestSize").value);
-      saveSettings(); applyTheme();
+      saveSettings();
+      applyTheme();
       alert("Ajustes guardados.");
     });
     document.getElementById("resetStats").addEventListener("click", async () => {
       const user = auth.currentUser;
-      if (!user) { alert("Debes iniciar sesión para resetear estadísticas."); return; }
+      if (!user) {
+        alert("Debes iniciar sesión para resetear estadísticas.");
+        return;
+      }
       if (!confirm("¿Seguro que deseas resetear las estadísticas de TODAS las carátulas?")) return;
       try {
         for (let cat of categories) {
-          cat.words.forEach(w => { w.failCount = 0; w.correctCount = 0; });
+          cat.words.forEach(w => {
+            w.failCount = 0;
+            w.correctCount = 0;
+          });
           const docRef = doc(db, "users", user.uid, "categories", cat.id);
           await setDoc(docRef, { words: cat.words }, { merge: true });
           const colRef = collection(db, "users", user.uid, "categories", cat.id, "globalHistory");
           const snap = await getDocs(colRef);
-          for (const d of snap.docs) { await deleteDoc(d.ref); }
+          for (const d of snap.docs) {
+            await deleteDoc(d.ref);
+          }
         }
         alert("Estadísticas de TODAS las carátulas reiniciadas.");
       } catch (err) {
@@ -2212,10 +2656,14 @@
             const catId = docSnap.id;
             const subColRef = collection(db, "users", user.uid, "categories", catId, "globalHistory");
             const subSnap = await getDocs(subColRef);
-            for (const d of subSnap.docs) { await deleteDoc(d.ref); }
+            for (const d of subSnap.docs) {
+              await deleteDoc(d.ref);
+            }
             await deleteDoc(docSnap.ref);
           }
-        } catch (err) { console.error("Error borrando carátulas:", err); }
+        } catch (err) {
+          console.error("Error borrando carátulas:", err);
+        }
       }
       alert("Todos los datos fueron borrados.");
       location.reload();
@@ -2229,7 +2677,9 @@
         const voices = window.speechSynthesis.getVoices();
         const mandarinVoice = voices.find(voice => voice.lang === 'zh-CN');
         const utterance = new SpeechSynthesisUtterance(text);
-        if (mandarinVoice) { utterance.voice = mandarinVoice; }
+        if (mandarinVoice) {
+          utterance.voice = mandarinVoice;
+        }
         utterance.lang = 'zh-CN';
         window.speechSynthesis.speak(utterance);
       }
@@ -2259,7 +2709,9 @@
     function renderCardDetails(card, frontField) {
       let details = "";
       wordFields.forEach(field => {
-        if (field.key !== frontField) { details += `<p><strong>${field.label}:</strong> ${card[field.key] || ""}</p>`; }
+        if (field.key !== frontField) {
+          details += `<p><strong>${field.label}:</strong> ${card[field.key] || ""}</p>`;
+        }
       });
       return details;
     }
@@ -2268,21 +2720,37 @@
      * AL CARGAR
      ********************************/
     window.addEventListener("DOMContentLoaded", () => {
-      loadSettings(); initGlobalStatsSorting(); showSection("sectionCaratulas");
+      loadSettings();
+      initGlobalStatsSorting();
+      showSection("sectionCaratulas");
       const storedCatId = localStorage.getItem("currentCategoryId");
-      if (storedCatId) { currentCategoryId = storedCatId; }
+      if (storedCatId) {
+        currentCategoryId = storedCatId;
+      }
       const tabPalabras = document.getElementById("tabPalabras");
       const tabCampos = document.getElementById("tabCampos");
       const tabPalabrasContent = document.getElementById("tabPalabrasContent");
       const tabCamposContent = document.getElementById("tabCamposContent");
       if (tabPalabras && tabCampos && tabPalabrasContent && tabCamposContent) {
-        tabPalabras.addEventListener("click", () => { tabPalabrasContent.classList.add("active"); tabCamposContent.classList.remove("active"); });
-        tabCampos.addEventListener("click", () => { tabCamposContent.classList.add("active"); tabPalabrasContent.classList.remove("active"); });
+        tabPalabras.addEventListener("click", () => {
+          tabPalabrasContent.classList.add("active");
+          tabCamposContent.classList.remove("active");
+        });
+        tabCampos.addEventListener("click", () => {
+          tabCamposContent.classList.add("active");
+          tabPalabrasContent.classList.remove("active");
+        });
       }
       // Asignar eventos a botones que no funcionaban
-      document.getElementById("openAddTableModalBtn").addEventListener("click", () => { document.getElementById("addTableModal").style.display = "block"; });
-      document.getElementById("closeAddTableModal").addEventListener("click", () => { document.getElementById("addTableModal").style.display = "none"; });
-      document.getElementById("toggleSavedLists").addEventListener("click", () => { document.getElementById("savedListsContainer").classList.toggle("hidden"); });
+      document.getElementById("openAddTableModalBtn").addEventListener("click", () => {
+        document.getElementById("addTableModal").style.display = "block";
+      });
+      document.getElementById("closeAddTableModal").addEventListener("click", () => {
+        document.getElementById("addTableModal").style.display = "none";
+      });
+      document.getElementById("toggleSavedLists").addEventListener("click", () => {
+        document.getElementById("savedListsContainer").classList.toggle("hidden");
+      });
     });
   </script>
 </body>
