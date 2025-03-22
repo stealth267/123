@@ -60,7 +60,7 @@
     }
     table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 16px; }
     table, th, td { border: 1px solid #ccc; }
-    th, td { padding: 8px; text-align: center; vertical-align: middle; cursor: pointer; }
+    th, td { padding: 8px; text-align: center; vertical-align: middle; cursor: pointer; white-space: normal; }
     th { background: #eee; }
     form input, form textarea, form select {
       margin: 5px 0; padding: 8px; font-size: 16px; width: 100%;
@@ -143,23 +143,44 @@
     }
     /* Sección Aprendizaje */
     #sectionNuevas { margin: 1em auto; max-width: 1200px; padding: 1em; }
-    /* Espaciado entre bloques de la sección Aprendizaje */
-    .aprendizaje-block { margin-bottom: 1em; }
-    /* Ajuste para que las tablas en la sección Aprendizaje se adapten sin scroll bars */
-    #sectionNuevas table {
-      width: 100%;
-      table-layout: fixed;
-      word-break: break-word;
+    /* Agregamos espacio entre bloques en la sección de Aprendizaje */
+    .aprendizaje-block {
+      margin-bottom: 1em;
     }
-    /* Opcional: aumentar el padding en las celdas dentro de Aprendizaje */
-    #sectionNuevas th, 
-    #sectionNuevas td {
-      padding: 10px;
+    .toggle-saved-lists {
+      width: 40px; height: 40px; border-radius: 50%; background: #ddd;
+      border: none; display: flex; align-items: center; justify-content: center;
+      font-size: 24px; cursor: pointer; margin-bottom: 0.5em;
     }
-    /* Si se desea que en el modal se muestren todas las filas sin scroll */
-    #customPracticeResultsContainer {
-      max-height: none;
-      overflow-y: visible;
+    .saved-lists-container { margin-top: 0.5em; border-top: 1px solid #ccc; padding-top: 0.5em; }
+    .saved-lists-container ul { list-style: none; padding: 0; margin: 0; }
+    .saved-lists-container li {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 5px; border-bottom: 1px solid #ccc; margin-bottom: 5px;
+    }
+    .saved-lists-container li span { flex: 1; margin-right: 10px; }
+    .saved-lists-container li button { margin-left: 5px; }
+    .add-word-btn {
+      width: 40px; height: 40px; border: 1px solid #ccc;
+      border-radius: 4px; background: #eee; font-size: 24px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; margin: 0 auto;
+    }
+    .btn-iniciar-practica {
+      background: #888; color: #fff; padding: 10px 15px;
+      border: none; border-radius: 4px; cursor: pointer;
+    }
+    .btn-iniciar-practica:hover { background: #666; }
+    #customPracticeResultsContainer { max-height: 300px; overflow-y: auto; }
+    
+    /* Modal de Focus Mode */
+    #focusModeModal .modal-content {
+      max-width: 700px; text-align: center;
+    }
+    /* Estilos para botones en Focus Mode (alineados con práctica) */
+    #focusModeModal #focusButtons button {
+      font-size: 18px;
+      padding: 12px 24px;
     }
     
     /* Ajustes para pantallas pequeñas (iPhone, etc.) */
@@ -173,12 +194,19 @@
         max-width: 300px;
         margin: 0 auto;
       }
-      /* Reducir fuente y padding en las tablas de la sección Aprendizaje para ajustarse mejor */
-      #sectionNuevas table,
-      #sectionNuevas th,
-      #sectionNuevas td {
+      /* Ajustes específicos para la sección de Aprendizaje */
+      #sectionNuevas table {
         font-size: 14px;
-        padding: 8px;
+        table-layout: fixed;
+        width: 100%;
+      }
+      #sectionNuevas table th, #sectionNuevas table td {
+        padding: 6px;
+        word-wrap: break-word;
+        white-space: normal;
+      }
+      .aprendizaje-block {
+        margin-bottom: 1em;
       }
     }
     
@@ -1662,22 +1690,13 @@
       else return "F";
     }
     function renderGlobalStats() {
-      const globalStatsEl = document.getElementById("globalStats");
-      const failTableBody = document.querySelector("#failTable tbody");
-      if (!failTableBody) return;
-
-      // Limpia siempre el tbody
-      failTableBody.innerHTML = "";
-
-      // Si no hay datos, muestra una fila con colspan que preserve las 7 columnas
       if (!globalHistory || globalHistory.length === 0) {
+        const globalStatsEl = document.getElementById("globalStats");
         if (globalStatsEl) { globalStatsEl.textContent = "No hay estadísticas globales disponibles para esta carátula."; }
-        const row = document.createElement("tr");
-        row.innerHTML = `<td colspan="7" style="text-align:center;">No hay datos disponibles</td>`;
-        failTableBody.appendChild(row);
+        const failTableBody = document.querySelector("#failTable tbody");
+        if (failTableBody) failTableBody.innerHTML = "";
         return;
       }
-
       let statsMap = {};
       globalHistory.forEach(entry => {
         const id = entry.id;
@@ -1697,19 +1716,22 @@
         else if (a[currentSortField] > b[currentSortField]) diff = 1;
         return currentSortOrder === 'asc' ? diff : -diff;
       });
+      const globalStatsEl = document.getElementById("globalStats");
       if (globalStatsEl) { globalStatsEl.textContent = `Total de palabras: ${words.length}`; }
+      const tbody = document.querySelector("#failTable tbody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
       statsArray.forEach(obj => {
         const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${obj.campoFrontal}</td>
+        row.innerHTML = 
+          `<td>${obj.campoFrontal}</td>
           <td>${obj.failCount}</td>
           <td>${obj.correctCount}</td>
           <td>${obj.total}</td>
           <td style="background-color: ${obtenerColor(obj)}">${obj.accuracy}</td>
           <td style="background-color: ${obtenerColor(obj)}">${obj.calificacion}</td>
-          <td><button onclick="resetStatsForWord('${obj.id}')">Resetear</button></td>
-        `;
-        failTableBody.appendChild(row);
+          <td><button onclick="resetStatsForWord('${obj.id}')">Resetear</button></td>`;
+        tbody.appendChild(row);
       });
     }
 
@@ -1748,10 +1770,9 @@
       if (!frontField && wordFieldsOrder.length > 0) { frontField = wordFieldsOrder[0]; }
       const sessionStatsEl = document.getElementById("sessionStats");
       if (sessionStatsEl) {
-        sessionStatsEl.textContent = `
-          Practicadas: ${sessionPracticed} | Aciertos: ${correctCount} |
-          Errores: ${sessionPracticed - correctCount} | Racha: ${currentStreak}
-        `;
+        sessionStatsEl.textContent = 
+          `Practicadas: ${sessionPracticed} | Aciertos: ${correctCount} |
+          Errores: ${sessionPracticed - correctCount} | Racha: ${currentStreak}`;
       }
       const tbody = document.querySelector("#sessionDetailTable tbody");
       if (!tbody) return;
@@ -1842,15 +1863,18 @@
       renderCustomPracticeTable();
     }
 
-    // MODIFICACIÓN: Se limita a mostrar solo 2 columnas (más la columna de "Acción") en el pop up.
+    const customPracticeSearch = document.getElementById("customPracticeSearch");
+    const customPracticeResultsTable = document.getElementById("customPracticeResults");
+    const customPracticeTable = document.getElementById("customPracticeTable");
+    const startCustomPracticeBtn = document.getElementById("startCustomPractice");
+
     function renderCustomPracticeResultsHeader() {
       if (!customPracticeResultsTable) return;
       const thead = customPracticeResultsTable.querySelector("thead");
       if (!thead) return;
       thead.innerHTML = "";
       const headerRow = document.createElement("tr");
-      // Solo mostramos las dos primeras columnas de wordFieldsOrder
-      wordFieldsOrder.slice(0,2).forEach(k => {
+      wordFieldsOrder.forEach(k => {
         const f = wordFields.find(x => x.key === k);
         if (f) {
           const th = document.createElement("th");
@@ -1864,7 +1888,6 @@
       thead.appendChild(headerRow);
     }
 
-    // MODIFICACIÓN: En el cuerpo de la tabla del pop up se muestran solo las 2 primeras columnas
     function renderCustomPracticeResultsBody(filtered) {
       if (!customPracticeResultsTable) return;
       const tbody = customPracticeResultsTable.querySelector("tbody");
@@ -1874,7 +1897,7 @@
         const row = document.createElement("tr");
         const isSelected = customPracticeList.some(x => x.id === item.id);
         if(isSelected) row.classList.add("selected-result");
-        wordFieldsOrder.slice(0,2).forEach(k => {
+        wordFieldsOrder.forEach(k => {
           const td = document.createElement("td");
           td.textContent = item[k] || "";
           row.appendChild(td);
@@ -1891,10 +1914,13 @@
       });
     }
 
-    const customPracticeSearch = document.getElementById("customPracticeSearch");
-    const customPracticeResultsTable = document.getElementById("customPracticeResults");
-    const customPracticeTable = document.getElementById("customPracticeTable");
-    const startCustomPracticeBtn = document.getElementById("startCustomPractice");
+    function addToCustomPractice(item) {
+      const yaExiste = customPracticeList.find(x => x.id === item.id);
+      if (yaExiste) { alert("Esta palabra ya está en la lista personalizada."); return; }
+      customPracticeList.push(item);
+      renderCustomPracticeTable();
+      renderCustomPracticeResultsBody(words);
+    }
 
     function renderCustomPracticeTable() {
       if (!customPracticeTable) return;
