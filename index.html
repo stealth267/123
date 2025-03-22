@@ -143,70 +143,32 @@
     }
     /* Sección Aprendizaje */
     #sectionNuevas { margin: 1em auto; max-width: 1200px; padding: 1em; }
-    /* Espaciado entre bloques de la sección Aprendizaje */
     .aprendizaje-block { margin-bottom: 1em; }
-    /* Ajuste para que las tablas en la sección Aprendizaje se adapten sin scroll bars */
     #sectionNuevas table {
       width: 100%;
       table-layout: fixed;
       word-break: break-word;
     }
-    /* Opcional: aumentar el padding en las celdas dentro de Aprendizaje */
     #sectionNuevas th, 
     #sectionNuevas td {
       padding: 10px;
     }
-    /* Si se desea que en el modal se muestren todas las filas sin scroll */
+    /* Estilos para el modal de agregar palabras (pop up) */
     #customPracticeResultsContainer {
-      max-height: none;
-      overflow-y: visible;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    /* Estilo para la fila seleccionada */
+    .selected-result {
+      background-color: #d0f0c0;
     }
     
-    /* Ajustes para pantallas pequeñas (iPhone, etc.) */
-    @media only screen and (max-width: 600px) {
-      .caratula-cards {
-        justify-content: center;
-        padding: 0 10px;
-      }
-      .caratula-card {
-        width: 100%;
-        max-width: 300px;
-        margin: 0 auto;
-      }
-      /* Reducir fuente y padding en las tablas para ajustarse mejor */
-      table, th, td {
-        font-size: 14px;
-        padding: 8px;
-      }
-      /* Específico para la tabla de estadísticas globales */
-      #failTable {
-         table-layout: fixed;
-         word-break: break-word;
-         font-size: 14px;
-      }
-      #failTable th, #failTable td {
-         padding: 8px;
-      }
-    }
-    
-    /* Nuevas reglas para separar el contenedor de práctica de la barra de progreso */
-    #practiceOptions {
-      margin-bottom: 1em;
-    }
-    
-    #progressBarContainer {
-      margin-top: 1em;
-    }
-    
-    /* ------------------ NUEVAS REGLAS PARA CUADRÍCULAS Y MODAL INFERIOR ------------------ */
-    
-    /* Grid para palabras seleccionadas en Aprendizaje */
+    /* Nuevas reglas para mostrar la cuadricula en la sección Aprendizaje */
     .custom-practice-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 10px;
     }
-    
     .custom-practice-card {
       background: #fff;
       border: 1px solid #ccc;
@@ -222,7 +184,7 @@
       cursor: pointer;
     }
     
-    /* Modal inferior para ver más detalles (se desliza desde abajo) */
+    /* Modal inferior para ver más detalles de la palabra */
     .modal-bottom {
       display: none;
       position: fixed;
@@ -254,6 +216,39 @@
       font-size: 28px;
       font-weight: bold;
       cursor: pointer;
+    }
+    
+    /* Ajustes para pantallas pequeñas (iPhone, etc.) */
+    @media only screen and (max-width: 600px) {
+      .caratula-cards {
+        justify-content: center;
+        padding: 0 10px;
+      }
+      .caratula-card {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+      }
+      table, th, td {
+        font-size: 14px;
+        padding: 8px;
+      }
+      #failTable {
+         table-layout: fixed;
+         word-break: break-word;
+         font-size: 14px;
+      }
+      #failTable th, #failTable td {
+         padding: 8px;
+      }
+    }
+    
+    /* Nuevas reglas para separar el contenedor de práctica de la barra de progreso */
+    #practiceOptions {
+      margin-bottom: 1em;
+    }
+    #progressBarContainer {
+      margin-top: 1em;
     }
   </style>
 </head>
@@ -313,7 +308,6 @@
       <!-- SECCIÓN PRACTICAR -->
       <section id="sectionPracticar">
         <h1>Modo Practicar</h1>
-        <!-- Dropdown para elegir carátula -->
         <div>
           <label>Carátula:</label>
           <select id="caratulaDropdownPracticar"></select>
@@ -321,7 +315,6 @@
           <span id="caratulaDropdownPracticarCheck" style="display:none; color:green; font-weight:bold;">✔</span>
         </div>
         <br/>
-        <!-- Opciones de práctica -->
         <div id="practiceOptions">
           <label for="practiceMode">Modo: </label>
           <select id="practiceMode">
@@ -334,7 +327,6 @@
           <select id="frontField"></select>
           <button id="startPractice">Iniciar Práctica</button>
         </div>
-        <!-- Barra de progreso -->
         <div id="progressBarContainer">
           <div id="progressBar"></div>
           <div id="progressCount"></div>
@@ -346,7 +338,6 @@
           <button id="btnMal" class="hidden" style="background:#f77; border:2px solid #c00;">Mal</button>
           <button id="btnBien" class="hidden" style="background:#7f7; border:2px solid #0c0;">Bien</button>
         </div>
-        <!-- Botones de sesión -->
         <div class="session-buttons">
           <button id="finishSession" style="background:#ccc;">Terminar Sesión</button>
           <button id="resetSession"  style="background:#ccc;">Resetear Sesión</button>
@@ -356,7 +347,6 @@
       <!-- SECCIÓN GESTIONAR -->
       <section id="sectionGestionar">
         <h1>Gestionar</h1>
-        <!-- Dropdown para elegir carátula -->
         <div>
           <label>Carátula:</label>
           <select id="caratulaDropdownGestionar"></select>
@@ -367,7 +357,6 @@
           <button id="tabPalabras">Palabras</button>
           <button id="tabCampos">Campos</button>
         </div>
-        <!-- Pestaña Palabras -->
         <div id="tabPalabrasContent" class="tabContent active">
           <h2>Gestión de Palabras</h2>
           <form id="wordForm">
@@ -393,7 +382,6 @@
           <button id="appendData">Sumar al archivo</button>
           <input type="file" id="appendFile" accept=".json, .csv, .xls, .xlsx" style="display:none;"/>
         </div>
-        <!-- Pestaña Campos -->
         <div id="tabCamposContent" class="tabContent">
           <h2>Gestionar Campos</h2>
           <form id="fieldsForm">
@@ -472,29 +460,24 @@
       <!-- SECCIÓN APRENDIZAJE -->
       <section id="sectionNuevas">
         <h1>Aprendizaje</h1>
-        <!-- Bloque para seleccionar carátula -->
         <div class="aprendizaje-block">
           <label>Carátula:</label>
           <select id="caratulaDropdownNuevas"></select>
           <button id="confirmCaratulaNuevas">Confirmar</button>
           <span id="caratulaDropdownNuevasCheck" style="display:none; color:green; font-weight:bold;">✔</span>
         </div>
-        <!-- Toggle para listas guardadas -->
         <div class="aprendizaje-block" id="savedListsWrapper">
           <button id="toggleSavedLists" class="toggle-saved-lists">≡</button>
           <div id="savedListsContainer" class="saved-lists-container hidden">
-            <!-- Las listas guardadas se renderizarán aquí -->
           </div>
         </div>
-        <!-- Botón para abrir el modal de agregar palabras (cuadro con +) -->
         <div class="aprendizaje-block" style="text-align: center;">
           <button id="openAddTableModalBtn" class="add-word-btn">+</button>
         </div>
-        <!-- Palabras seleccionadas en cuadricula -->
+        <!-- Aquí se muestra la cuadricula de palabras seleccionadas -->
         <div class="aprendizaje-block">
           <h2 style="font-size: 1em; margin-bottom: 0.5em;">Palabras Seleccionadas</h2>
           <div id="customPracticeGrid" class="custom-practice-grid"></div>
-          <!-- Contenedor para botones de Focus Mode y Guardar Lista alineados -->
           <div class="focus-mode-controls" style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
             <button id="btnFocusMode">Iniciar Focus Mode</button>
             <div class="list-save-container" style="display: flex; gap: 10px; align-items: center;">
@@ -503,7 +486,6 @@
             </div>
           </div>
         </div>
-        <!-- Botón final para iniciar práctica personalizada -->
         <div style="text-align: center;">
           <button id="startCustomPractice" class="btn-iniciar-practica">Iniciar Práctica Personalizada</button>
         </div>
@@ -534,7 +516,6 @@
           <input type="checkbox" id="notificationsEnabled" checked/><br/>
           <label>Cantidad de palabras nuevas:</label>
           <input type="number" id="newWordsCount" value="10" min="1" required/><br/>
-          <!-- Ajustes para Focus Mode -->
           <label>Bloque de Focus Mode (preguntas por test):</label>
           <input type="number" id="focusBlockSize" value="5" min="1" required/><br/>
           <label>Total de preguntas en Focus Mode (test final):</label>
@@ -581,16 +562,12 @@
   <div id="focusModeModal" class="modal">
     <div class="modal-content" style="max-width: 500px; text-align: center;">
       <h2 id="focusPhaseTitle">Focus Mode</h2>
-      <!-- Barra de progreso -->
       <div id="focusProgressBarContainer" style="position: relative; background: #ddd; width: 100%; height: 20px; border-radius: 10px; overflow: hidden; margin-bottom: 10px;">
         <div id="focusProgressBar" style="background: #4CAF50; height: 100%; width: 0%; transition: width 0.3s;"></div>
         <div id="focusProgressCount" style="position: absolute; top: 0; left: 0; width: 100%; text-align: center; line-height: 20px; font-size: 14px; color: #000;"></div>
       </div>
-      <!-- Flashcard -->
       <div id="focusFlashcard" class="flashcard" style="cursor: default;">?</div>
-      <!-- Detalles -->
       <div id="focusDetails" class="details hidden"></div>
-      <!-- Botones de acción -->
       <div id="focusButtons" style="margin-top: 10px;">
         <button id="btnConfirmMemorization">Confirmar Memorización</button>
         <button id="focusBtnMostrar" class="hidden">Mostrar</button>
@@ -603,21 +580,17 @@
     </div>
   </div>
 
-  <!-- Modal inferior para ver más detalles de la palabra (se desliza desde abajo) -->
+  <!-- Modal inferior para ver más detalles de la palabra -->
   <div id="detailModal" class="modal-bottom">
     <div class="modal-content">
       <span class="closeModal" id="closeDetailModal">×</span>
       <div id="detailModalContent">
-        <!-- Se mostrarán los detalles de la palabra -->
       </div>
     </div>
   </div>
 
   <!-- SCRIPT PRINCIPAL -->
   <script type="module">
-    /********************************
-     * IMPORTS DE FIREBASE (MODULAR)
-     ********************************/
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
     import {
@@ -640,9 +613,6 @@
     } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
     import { onSnapshot as onSnapshotQuery } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
-    /********************************
-     * CONFIGURACIÓN DE FIREBASE
-     ********************************/
     const firebaseConfig = {
       apiKey: "AIzaSyBnl6pd_m4AsypD1IPJ11FhgZQf8XFDEqw",
       authDomain: "appz-571f4.firebaseapp.com",
@@ -658,9 +628,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    /********************************
-     * VARIABLES GLOBALES
-     ********************************/
     let categories = [];        
     let currentCategoryId = ""; 
     let wordFields = [];
@@ -668,7 +635,6 @@
     let words = [];
     let globalHistory = [];
 
-    // Ajustes (incluye Focus Mode)
     let settings = {
       keyMostrar: "m",
       keyCorrect: "k",
@@ -683,40 +649,31 @@
       focusTestSize: 10
     };
 
-    // Estado de práctica
     let practiceSessionWords = [];
     let currentIndex = 0, correctCount = 0, sessionPracticed = 0;
     let responses = [];
     let currentStreak = 0;
     let weightedMode = false;
 
-    // Para "Aprendizaje"
     let currentEditIndex = null;
     let customPracticeList = [];
     let personalizedLists = [];
     let unsubPersonalizedLists = null;
 
-    // Variables para Focus Mode
     let focusCards = [];
     let focusBlockIndex = 0;
     let focusCurrentIndex = 0;
     let focusPhase = "";
 
-    // Paginación en "Gestionar"
     let currentPage = 1;
     const pageSize = 100;
 
-    // Ordenar en “Estadísticas”
     let currentSortField = 'failCount';
     let currentSortOrder = 'desc';
     let draggedIndex = null;
 
-    // Archivo a importar
     let fileToImport = null;
 
-    /********************************
-     * MENÚ LATERAL Y SECCIONES
-     ********************************/
     const menuToggleBtn = document.getElementById("menuToggle");
     const sideNav = document.getElementById("sideNav");
     const mainContent = document.getElementById("mainContent");
@@ -748,9 +705,6 @@
     document.getElementById("btnAjustes").addEventListener("click", () => showSection("sectionAjustes"));
     document.getElementById("btnLoginSection").addEventListener("click", () => showSection("sectionLogin"));
 
-    /********************************
-     * AUTENTICACIÓN
-     ********************************/
     const loginEmail = document.getElementById("loginEmail");
     const loginPassword = document.getElementById("loginPassword");
     const btnRegister = document.getElementById("btnRegister");
@@ -799,9 +753,6 @@
       }
     });
 
-    /********************************
-     * SUSCRIPCIÓN A LA LISTA DE CARÁTULAS
-     ********************************/
     function subscribeToCategories() {
       const user = auth.currentUser;
       if (!user) return;
@@ -821,9 +772,6 @@
       });
     }
 
-    /********************************
-     * RENDER DE LAS TARJETAS (Carátulas)
-     ********************************/
     const caratulaCardsContainer = document.getElementById("caratulaCardsContainer");
     function renderCaratulaCards() {
       caratulaCardsContainer.innerHTML = "";
@@ -879,9 +827,6 @@
       }
     }
 
-    /********************************
-     * CREAR CARÁTULA
-     ********************************/
     const createCaratulaModal = document.getElementById("createCaratulaModal");
     const closeCreateModal = document.getElementById("closeCreateModal");
     const btnCrearCaratulaModal = document.getElementById("btnCrearCaratulaModal");
@@ -904,9 +849,6 @@
       }
     }
 
-    /********************************
-     * SELECCIONAR CARÁTULA
-     ********************************/
     function selectCategoryById(catId) {
       currentCategoryId = catId;
       localStorage.setItem("currentCategoryId", catId);
@@ -948,7 +890,6 @@
       if (unsubPersonalizedLists) unsubPersonalizedLists();
       unsubPersonalizedLists = subscribeToPersonalizedLists();
       customPracticeList = [];
-      // Actualizamos la vista de palabras seleccionadas en cuadricula en vez de tabla:
       renderCustomPracticeGrid();
       renderCustomPracticeResultsHeader();
       renderCustomPracticeResultsBody(words);
@@ -1110,7 +1051,6 @@
       submitBtn.textContent = "Agregar Palabra";
       submitBtn.type = "submit";
       form.appendChild(submitBtn);
-
       const inputs = form.querySelectorAll("input, textarea");
       inputs.forEach((input, index) => {
         input.addEventListener("keydown", function(e) {
@@ -1123,9 +1063,6 @@
       });
     }
 
-    /********************************
-     * RENDERIZAR TABLA GESTIONAR + FILTRO
-     ********************************/
     function renderizarTabla() {
       const tbody = document.querySelector("#wordsTable tbody");
       const thead = document.querySelector("#wordsTable thead");
@@ -1301,9 +1238,6 @@
       currentEditIndex = null;
     });
 
-    /********************************
-     * SAVE WORDS EN FIRESTORE
-     ********************************/
     function saveWords() {
       if (!currentCategoryId) return;
       const cat = categories.find(c => c.id === currentCategoryId);
@@ -1327,9 +1261,6 @@
       } catch (err) { console.error("Error guardando carátula:", err); }
     }
 
-    /********************************
-     * GESTIÓN DE CAMPOS (DRAG & DROP)
-     ********************************/
     function updateFieldsList() {
       const fieldsList = document.getElementById("fieldsList");
       if (!fieldsList) return;
@@ -1403,9 +1334,6 @@
       document.getElementById("fieldsForm").reset();
     });
 
-    /********************************
-     * IMPORTAR / EXPORTAR
-     ********************************/
     window.exportData = function() {
       const dataStr = JSON.stringify(words, null, 2);
       const blob = new Blob([dataStr], { type: "application/json" });
@@ -1517,9 +1445,6 @@
       alert("Datos fusionados correctamente.");
     }
 
-    /********************************
-     * MODO PRACTICAR
-     ********************************/
     const btnStartPractice = document.getElementById("startPractice");
     const flashcardDiv = document.getElementById("flashcard");
     const detailsDiv = document.getElementById("details");
@@ -1702,11 +1627,8 @@
       } catch (e) { console.error("Error en globalHistory:", e); }
     }
 
-    async function syncStatsWithGlobalHistory() { /* Sin cambios */ }
+    async function syncStatsWithGlobalHistory() { }
 
-    /********************************
-     * ESTADÍSTICAS
-     ********************************/
     function obtenerColor(obj) {
       const fallos = obj.failCount || 0, aciertos = obj.correctCount || 0, total = fallos + aciertos;
       if (total === 0) return "#FFFFFF";
@@ -1832,9 +1754,6 @@
       renderSessionStats();
     });
 
-    /********************************
-     * APRENDIZAJE (PERSONALIZED PRACTICE)
-     ********************************/
     function subscribeToPersonalizedLists() {
       const user = auth.currentUser;
       if (!user || !currentCategoryId) return;
@@ -1896,7 +1815,6 @@
 
     function loadPersonalizedList(wordIds) {
       customPracticeList = words.filter(w => wordIds.includes(w.id));
-      // Actualizamos la cuadricula en lugar de la tabla:
       renderCustomPracticeGrid();
     }
 
@@ -1910,7 +1828,8 @@
       if (!thead) return;
       thead.innerHTML = "";
       const headerRow = document.createElement("tr");
-      wordFieldsOrder.forEach(k => {
+      // Solo las primeras 2 columnas
+      wordFieldsOrder.slice(0,2).forEach(k => {
         const f = wordFields.find(x => x.key === k);
         if (f) {
           const th = document.createElement("th");
@@ -1924,6 +1843,7 @@
       thead.appendChild(headerRow);
     }
 
+    // Mostrar solo las primeras 2 columnas y la columna con el botón Agregar
     function renderCustomPracticeResultsBody(filtered) {
       if (!customPracticeResultsTable) return;
       const tbody = customPracticeResultsTable.querySelector("tbody");
@@ -1933,7 +1853,7 @@
         const row = document.createElement("tr");
         const isSelected = customPracticeList.some(x => x.id === item.id);
         if(isSelected) row.classList.add("selected-result");
-        wordFieldsOrder.forEach(k => {
+        wordFieldsOrder.slice(0,2).forEach(k => {
           const td = document.createElement("td");
           td.textContent = item[k] || "";
           row.appendChild(td);
@@ -1954,14 +1874,10 @@
       const yaExiste = customPracticeList.find(x => x.id === item.id);
       if (yaExiste) { alert("Esta palabra ya está en la lista personalizada."); return; }
       customPracticeList.push(item);
-      // Actualizamos la vista de la cuadricula
       renderCustomPracticeGrid();
       renderCustomPracticeResultsBody(words);
     }
 
-    /********************************
-     * NUEVAS FUNCIONES: RENDERIZAR CUADRÍCULA Y MODAL
-     ********************************/
     function renderCustomPracticeGrid() {
       const grid = document.getElementById("customPracticeGrid");
       if (!grid) return;
@@ -1970,21 +1886,13 @@
       customPracticeList.forEach((w, idx) => {
         const card = document.createElement("div");
         card.classList.add("custom-practice-card");
-        
-        // Mostrar el campo frontal
         const frontText = document.createElement("p");
         frontText.textContent = w[frontField] || "";
         card.appendChild(frontText);
-        
-        // Botón "Ver más"
         const btnVerMas = document.createElement("button");
         btnVerMas.textContent = "Ver más";
-        btnVerMas.addEventListener("click", () => {
-          openDetailModal(w);
-        });
+        btnVerMas.addEventListener("click", () => { openDetailModal(w); });
         card.appendChild(btnVerMas);
-        
-        // Botón "Quitar"
         const btnQuitar = document.createElement("button");
         btnQuitar.textContent = "Quitar";
         btnQuitar.style.background = "#f44336";
@@ -1995,7 +1903,6 @@
           renderCustomPracticeResultsBody(words);
         });
         card.appendChild(btnQuitar);
-        
         grid.appendChild(card);
       });
     }
@@ -2028,9 +1935,6 @@
       showSection("sectionPracticar"); showCard();
     }
 
-    /********************************
-     * FOCUS MODE (POP UP)
-     ********************************/
     function startFocusModeSession() {
       if (customPracticeList.length < settings.focusTestSize) {
         alert("Necesitas al menos " + settings.focusTestSize + " palabras para Focus Mode.");
@@ -2160,9 +2064,6 @@
 
     document.getElementById("btnFocusMode").addEventListener("click", startFocusModeSession);
 
-    /********************************
-     * AJUSTES
-     ********************************/
     function applyTheme() {
       if (document.getElementById("darkTheme").checked) { document.body.classList.add("dark-theme"); settings.darkTheme = true; }
       else { document.body.classList.remove("dark-theme"); settings.darkTheme = false; }
@@ -2244,9 +2145,6 @@
       location.reload();
     });
 
-    /********************************
-     * AUDIO
-     ********************************/
     function speak(text) {
       if ('speechSynthesis' in window && settings.audioEnabled) {
         const voices = window.speechSynthesis.getVoices();
@@ -2258,9 +2156,6 @@
       }
     }
 
-    /********************************
-     * UTILIDADES
-     ********************************/
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
