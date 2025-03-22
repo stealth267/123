@@ -143,41 +143,25 @@
     }
     /* Sección Aprendizaje */
     #sectionNuevas { margin: 1em auto; max-width: 1200px; padding: 1em; }
-    .toggle-saved-lists {
-      width: 40px; height: 40px; border-radius: 50%; background: #ddd;
-      border: none; display: flex; align-items: center; justify-content: center;
-      font-size: 24px; cursor: pointer; margin-bottom: 0.5em;
+    /* Espaciado entre bloques de la sección Aprendizaje */
+    .aprendizaje-block { margin-bottom: 1em; }
+    /* Ajuste para que las tablas en la sección Aprendizaje se adapten sin scroll bars */
+    #sectionNuevas table {
+      width: 100%;
+      table-layout: fixed;
+      word-break: break-word;
     }
-    .saved-lists-container { margin-top: 0.5em; border-top: 1px solid #ccc; padding-top: 0.5em; }
-    .saved-lists-container ul { list-style: none; padding: 0; margin: 0; }
-    .saved-lists-container li {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 5px; border-bottom: 1px solid #ccc; margin-bottom: 5px;
+    /* Opcional: aumentar el padding en las celdas dentro de Aprendizaje */
+    #sectionNuevas th, 
+    #sectionNuevas td {
+      padding: 10px;
     }
-    .saved-lists-container li span { flex: 1; margin-right: 10px; }
-    .saved-lists-container li button { margin-left: 5px; }
-    .add-word-btn {
-      width: 40px; height: 40px; border: 1px solid #ccc;
-      border-radius: 4px; background: #eee; font-size: 24px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; margin: 0 auto;
+    /* Si se desea que en el modal se muestren todas las filas sin scroll */
+    #customPracticeResultsContainer {
+      max-height: none;
+      overflow-y: visible;
     }
-    .btn-iniciar-practica {
-      background: #888; color: #fff; padding: 10px 15px;
-      border: none; border-radius: 4px; cursor: pointer;
-    }
-    .btn-iniciar-practica:hover { background: #666; }
-    #customPracticeResultsContainer { max-height: 300px; overflow-y: auto; }
     
-    /* Modal de Focus Mode */
-    #focusModeModal .modal-content {
-      max-width: 700px; text-align: center;
-    }
-    /* Estilos para botones en Focus Mode (alineados con práctica) */
-    #focusModeModal #focusButtons button {
-      font-size: 18px;
-      padding: 12px 24px;
-    }
     /* Ajustes para pantallas pequeñas (iPhone, etc.) */
     @media only screen and (max-width: 600px) {
       .caratula-cards {
@@ -189,7 +173,15 @@
         max-width: 300px;
         margin: 0 auto;
       }
+      /* Reducir fuente y padding en las tablas de la sección Aprendizaje para ajustarse mejor */
+      #sectionNuevas table,
+      #sectionNuevas th,
+      #sectionNuevas td {
+        font-size: 14px;
+        padding: 8px;
+      }
     }
+    
     /* Nuevas reglas para separar el contenedor de práctica de la barra de progreso */
     #practiceOptions {
       margin-bottom: 1em; /* Espacio inferior para separar del siguiente elemento */
