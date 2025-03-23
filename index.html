@@ -33,8 +33,9 @@
     }
     .side-nav h2 { font-size: 18px; margin: 0 0 1em; text-align: center; }
     .side-nav button {
-      display: block; width: 100%; text-align: left; margin: 0.2em 0;
-      padding: 10px; font-size: 16px; cursor: pointer;
+      display: block; width: 100%; text-align: left;
+      margin: 10px 0; padding: 12px;
+      font-size: 16px; cursor: pointer;
       background: #fafafa; border: 1px solid #ddd; border-radius: 5px;
     }
     .menu-toggle {
@@ -67,11 +68,11 @@
       box-sizing: border-box;
     }
     form button {
-      padding: 8px 12px; font-size: 16px; cursor: pointer;
-      width: 100%; margin: 5px 0;
+      padding: 10px 15px; font-size: 16px; cursor: pointer;
+      width: 100%; margin: 10px 0;
     }
     .tabs { text-align: center; margin-bottom: 15px; }
-    .tabs button { margin: 0 5px; padding: 8px 12px; font-size: 16px; cursor: pointer; }
+    .tabs button { margin: 5px; padding: 10px; font-size: 16px; cursor: pointer; }
     .tabContent { display: none; }
     .tabContent.active { display: block; }
     .dark-theme { background: #1e1e1e; color: #ff6600; }
@@ -90,6 +91,10 @@
       background-color: #292929; margin: 5% auto; padding: 20px;
       border: 1px solid #888; width: 90%; max-width: 700px;
       position: relative; border-radius: 6px;
+    }
+    .dark-theme .modal-content {
+      background-color: #444;
+      color: #ddd;
     }
     .closeModal {
       position: absolute; top: 10px; right: 15px; font-size: 28px;
@@ -160,7 +165,7 @@
     }
     /* Estilo para la fila seleccionada */
     .selected-result {
-      background-color: #d0f0c0;
+      background-color: #00575a;
     }
     /* Cuadrícula de palabras personalizadas */
     .custom-practice-grid {
@@ -176,11 +181,19 @@
       text-align: center;
       position: relative;
     }
+    .dark-theme .custom-practice-card {
+      background: #333;
+      color: #ddd;
+    }
     .custom-practice-card button {
       margin-top: 5px;
       padding: 5px 10px;
       font-size: 14px;
       cursor: pointer;
+    }
+    .dark-theme .custom-practice-card button {
+      background: #555;
+      color: #fff;
     }
     /* Modal inferior para ver más detalles de la palabra */
     .modal-bottom {
@@ -190,7 +203,7 @@
       left: 0;
       width: 100%;
       max-height: 80%;
-      background: #fff;
+      background: #00000073;
       border-top-left-radius: 10px;
       border-top-right-radius: 10px;
       box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
@@ -215,6 +228,13 @@
       font-weight: bold;
       cursor: pointer;
     }
+    /* Separador entre la barra de progreso y el contenedor de práctica */
+    #practiceOptions {
+      margin-bottom: 1em;
+    }
+    #progressBarContainer {
+      margin-top: 1em;
+    }
     /* Ajustes para pantallas pequeñas (iPhone, etc.) */
     @media only screen and (max-width: 600px) {
       .caratula-cards {
@@ -238,13 +258,22 @@
       #failTable th, #failTable td {
          padding: 8px;
       }
-    }
-    /* Separador entre la barra de progreso y el contenedor de práctica */
-    #practiceOptions {
-      margin-bottom: 1em;
-    }
-    #progressBarContainer {
-      margin-top: 1em;
+      .side-nav button {
+          margin: 10px 0;
+          padding: 12px;
+          font-size: 16px;
+      }
+      form button {
+          margin: 10px 0;
+          padding: 10px 15px;
+      }
+      .tabs button {
+          margin: 5px;
+          padding: 10px;
+      }
+      .session-buttons {
+          width: 100%;
+      }
     }
   </style>
 </head>
@@ -286,7 +315,7 @@
       <!-- SECCIÓN CARÁTULAS -->
       <section id="sectionCaratulas" class="active">
         <h1>Carátulas / Temas</h1>
-        <p>puedes eliminar la carátula o reiniciar sus estadísticas.</p>  
+        <p>Puedes eliminar la carátula o reiniciar sus estadísticas.</p>  
         <div class="caratula-cards" id="caratulaCardsContainer"></div>
         <div id="createCaratulaModal" class="modal">
           <div class="modal-content">
@@ -336,7 +365,6 @@
           <button id="finishSession" style="background:#ccc;">Terminar Sesión</button>
           <button id="resetSession"  style="background:#ccc;">Resetear Sesión</button>
         </div>
-        <!-- Se eliminó el botón Focus Mode de esta sección -->
       </section>
 
       <!-- SECCIÓN GESTIONAR -->
@@ -358,10 +386,7 @@
             <p>No hay campos definidos. Importa un archivo o define tus campos manualmente.</p>
           </form>
           <input type="text" id="wordSearch" placeholder="Buscar palabra..."/>
-          <table id="wordsTable">
-            <thead></thead>
-            <tbody></tbody>
-          </table>
+          <div id="wordsGrid" class="custom-practice-grid"></div>
           <div class="pagination-controls">
             <button id="btnPrevPage">Anterior</button>
             <span id="paginationInfo">Página 1</span>
@@ -470,11 +495,11 @@
         <div class="aprendizaje-block" style="text-align: center;">
           <button id="openAddTableModalBtn" class="add-word-btn">+</button>
         </div>
-        <!-- Contenedor de la cuadricula de palabras seleccionadas -->
+        <!-- Contenedor de la cuadrícula de palabras seleccionadas -->
         <div class="aprendizaje-block">
           <h2 style="font-size: 1em; margin-bottom: 0.5em;">Palabras Seleccionadas</h2>
           <div id="customPracticeGrid" class="custom-practice-grid"></div>
-          <!-- Contenedor para guardar lista: al guardar se crea un nuevo documento en la colección -->
+          <!-- Contenedor para guardar lista -->
           <div class="list-save-container" style="display: flex; gap: 10px; align-items: center;">
             <input type="text" id="listNameInput" placeholder="Nombre de la lista"/>
             <button id="btnSaveList">Guardar Lista</button>
@@ -483,7 +508,6 @@
         <div style="text-align: center;">
           <button id="startCustomPractice" class="btn-iniciar-practica">Iniciar Práctica Personalizada</button>
         </div>
-        <!-- Botón Focus Mode agregado en la sección Aprendizaje -->
         <div style="text-align: center; margin-top: 1em;">
           <button id="btnFocusMode" style="background:#ccc;">Focus Mode</button>
         </div>
@@ -505,11 +529,11 @@
           <input type="number" id="feedbackDelay" value="500" required/><br/>
           <label>Audio Activado:</label>
           <select id="audioEnabled">
-            <option value="true" selected>Si</option>
+            <option value="true" selected>Sí</option>
             <option value="false">No</option>
           </select><br/>
           <label>Tema Oscuro:</label>
-          <input type="checkbox" id="darkTheme"/><br/>
+          <input type="checkbox" id="darkTheme" checked/><br/>
           <label>Notificaciones:</label>
           <input type="checkbox" id="notificationsEnabled" checked/><br/>
           <label>Cantidad de palabras nuevas:</label>
@@ -640,7 +664,7 @@
       problemThreshold: 2,
       audioEnabled: true,
       feedbackDelay: 500,
-      darkTheme: false,
+      darkTheme: true, // Modo oscuro por defecto
       notificationsEnabled: true,
       newWordsCount: 10,
       focusBlockSize: 5,
@@ -745,7 +769,7 @@
         loginStatus.textContent = "No hay usuario logueado";
         btnLogout.style.display = "none";
         words = []; wordFields = []; wordFieldsOrder = []; globalHistory = [];
-        renderizarTabla(); generarFormularioDinamico([]); updateFieldsList();
+        renderWordsGrid(); generarFormularioDinamico([]); updateFieldsList();
         const frontSelect = document.getElementById("frontField");
         if (frontSelect) frontSelect.innerHTML = "<option>No hay campos</option>";
       }
@@ -882,7 +906,7 @@
         wordFields = keys.map(k => ({ key: k, label: k, type: "text", required: false }));
       }
       generarFormularioDinamico(wordFields);
-      updateFieldsList(); updateFrontFieldOptions(); currentPage = 1; renderizarTabla();
+      updateFieldsList(); updateFrontFieldOptions(); currentPage = 1; renderWordsGrid();
       if (unsubGlobalHistory) unsubGlobalHistory();
       unsubGlobalHistory = subscribeGlobalHistoryForCategory(currentCategoryId);
       if (unsubPersonalizedLists) unsubPersonalizedLists();
@@ -1061,108 +1085,50 @@
       });
     }
 
-    function renderizarTabla() {
-      const tbody = document.querySelector("#wordsTable tbody");
-      const thead = document.querySelector("#wordsTable thead");
-      if (!tbody || !thead) return;
-      tbody.innerHTML = "";
-      thead.innerHTML = "";
-      if (wordFieldsOrder.length > 0) {
-        const headerRow = document.createElement("tr");
-        wordFieldsOrder.forEach(key => {
-          const field = wordFields.find(f => f.key === key);
-          if (field) {
-            const th = document.createElement("th");
-            th.textContent = field.label;
-            headerRow.appendChild(th);
-          }
-        });
-        const thAcciones = document.createElement("th");
-        thAcciones.textContent = "Acciones";
-        headerRow.appendChild(thAcciones);
-        thead.appendChild(headerRow);
-      }
-      const totalWords = words.length;
+    function renderWordsGrid(wordsToRender = words) {
+      const grid = document.getElementById("wordsGrid");
+      if (!grid) return;
+      grid.innerHTML = "";
+      let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : (wordFieldsOrder[0] || "");
+      const totalWords = wordsToRender.length;
       const totalPages = Math.ceil(totalWords / pageSize);
       if (currentPage > totalPages) currentPage = totalPages < 1 ? 1 : totalPages;
       if (currentPage < 1) currentPage = 1;
       const start = (currentPage - 1) * pageSize;
       const end = start + pageSize;
-      const wordsToRender = words.slice(start, end);
-      wordsToRender.forEach((word, idx) => {
-        const row = document.createElement("tr");
-        wordFieldsOrder.forEach(key => {
-          const td = document.createElement("td");
-          td.textContent = word[key] || "";
-          row.appendChild(td);
-        });
-        if (wordFieldsOrder.length > 0) {
-          const tdAcciones = document.createElement("td");
-          const btnEdit = document.createElement("button");
-          btnEdit.textContent = "Editar";
-          btnEdit.onclick = () => editarPalabra(start + idx);
-          const btnDelete = document.createElement("button");
-          btnDelete.textContent = "Borrar";
-          btnDelete.onclick = () => borrarPalabra(start + idx);
-          tdAcciones.appendChild(btnEdit);
-          tdAcciones.appendChild(btnDelete);
-          row.appendChild(tdAcciones);
-        }
-        tbody.appendChild(row);
+      const wordsPage = wordsToRender.slice(start, end);
+      wordsPage.forEach((w, idx) => {
+        const card = document.createElement("div");
+        card.classList.add("custom-practice-card");
+        const frontText = document.createElement("p");
+        frontText.textContent = w[frontField] || "";
+        card.appendChild(frontText);
+        const btnMas = document.createElement("button");
+        btnMas.textContent = "Más";
+        btnMas.addEventListener("click", () => { openDetailModal(w); });
+        card.appendChild(btnMas);
+        const btnEditar = document.createElement("button");
+        btnEditar.textContent = "Editar";
+        btnEditar.addEventListener("click", () => { editarPalabra(start + idx); });
+        card.appendChild(btnEditar);
+        const btnBorrar = document.createElement("button");
+        btnBorrar.textContent = "Borrar";
+        btnBorrar.addEventListener("click", () => { borrarPalabra(start + idx); });
+        card.appendChild(btnBorrar);
+        grid.appendChild(card);
       });
       const paginationInfo = document.getElementById("paginationInfo");
       if (paginationInfo) { paginationInfo.textContent = `Página ${currentPage} de ${totalPages || 1}`; }
     }
 
-    document.getElementById("btnPrevPage").addEventListener("click", () => { currentPage--; renderizarTabla(); });
-    document.getElementById("btnNextPage").addEventListener("click", () => { currentPage++; renderizarTabla(); });
+    document.getElementById("btnPrevPage").addEventListener("click", () => { currentPage--; renderWordsGrid(); });
+    document.getElementById("btnNextPage").addEventListener("click", () => { currentPage++; renderWordsGrid(); });
 
     document.getElementById("wordSearch").addEventListener("input", () => {
       const term = document.getElementById("wordSearch").value.toLowerCase();
-      if (term === "") { currentPage = 1; renderizarTabla(); return; }
-      const filtered = words.map((word, index) => ({ word, index }))
-        .filter(item => wordFieldsOrder.some(key => String(item.word[key] || "").toLowerCase().includes(term)));
-      const tbody = document.querySelector("#wordsTable tbody");
-      const thead = document.querySelector("#wordsTable thead");
-      if (!tbody || !thead) return;
-      tbody.innerHTML = "";
-      thead.innerHTML = "";
-      if (wordFieldsOrder.length > 0) {
-        const headerRow = document.createElement("tr");
-        wordFieldsOrder.forEach(key => {
-          const field = wordFields.find(f => f.key === key);
-          if (field) {
-            const th = document.createElement("th");
-            th.textContent = field.label;
-            headerRow.appendChild(th);
-          }
-        });
-        const thAcciones = document.createElement("th");
-        thAcciones.textContent = "Acciones";
-        headerRow.appendChild(thAcciones);
-        thead.appendChild(headerRow);
-      }
-      filtered.forEach(item => {
-        const row = document.createElement("tr");
-        wordFieldsOrder.forEach(key => {
-          const td = document.createElement("td");
-          td.textContent = item.word[key] || "";
-          row.appendChild(td);
-        });
-        if (wordFieldsOrder.length > 0) {
-          const tdAcciones = document.createElement("td");
-          const btnEdit = document.createElement("button");
-          btnEdit.textContent = "Editar";
-          btnEdit.onclick = () => editarPalabra(item.index);
-          const btnDelete = document.createElement("button");
-          btnDelete.textContent = "Borrar";
-          btnDelete.onclick = () => borrarPalabra(item.index);
-          tdAcciones.appendChild(btnEdit);
-          tdAcciones.appendChild(btnDelete);
-          row.appendChild(tdAcciones);
-        }
-        tbody.appendChild(row);
-      });
+      if (term === "") { currentPage = 1; renderWordsGrid(); return; }
+      const filtered = words.filter(w => wordFieldsOrder.some(k => String(w[k] || "").toLowerCase().includes(term)));
+      renderWordsGrid(filtered);
       const paginationInfo = document.getElementById("paginationInfo");
       if (paginationInfo) { paginationInfo.textContent = `Mostrando ${filtered.length} resultado(s)`; }
     });
@@ -1182,7 +1148,7 @@
       words.push(nuevaPalabra);
       saveWords();
       currentPage = Math.ceil(words.length / pageSize);
-      renderizarTabla();
+      renderWordsGrid();
     });
 
     window.editarPalabra = function(index) {
@@ -1213,7 +1179,7 @@
       if (confirm("¿Borrar esta palabra?")) {
         words.splice(index, 1);
         saveWords();
-        renderizarTabla();
+        renderWordsGrid();
       }
     };
 
@@ -1226,7 +1192,7 @@
       });
       if (!words[currentEditIndex].id) { words[currentEditIndex].id = Date.now() + Math.random().toString(16).slice(2); }
       saveWords();
-      renderizarTabla();
+      renderWordsGrid();
       document.getElementById("editModal").style.display = "none";
       currentEditIndex = null;
     });
@@ -1279,7 +1245,7 @@
           updateFieldsList();
           generarFormularioDinamico(wordFields);
           updateFrontFieldOptions();
-          renderizarTabla();
+          renderWordsGrid();
           saveWords();
         };
         li.appendChild(btnRemove);
@@ -1303,7 +1269,7 @@
       wordFieldsOrder.splice(targetIndex, 0, movedField);
       wordFields = wordFieldsOrder.map(k => wordFields.find(f => f.key === k));
       updateFieldsList();
-      renderizarTabla();
+      renderWordsGrid();
       saveWords();
       draggedIndex = null;
     }
@@ -1327,12 +1293,11 @@
       updateFieldsList();
       generarFormularioDinamico(wordFields);
       updateFrontFieldOptions();
-      renderizarTabla();
+      renderWordsGrid();
       saveWords();
       document.getElementById("fieldsForm").reset();
     });
 
-    // EVENTO PARA GUARDAR LISTA PERSONALIZADA
     document.getElementById("btnSaveList").addEventListener("click", () => {
       const name = document.getElementById("listNameInput").value.trim();
       if (!name) { alert("Ingresa un nombre para la lista."); return; }
@@ -1427,7 +1392,7 @@
         wordFieldsOrder = keys;
         wordFields = keys.map(k => ({ key: k, label: k, type: "text", required: false }));
       }
-      saveWords(); renderizarTabla(); generarFormularioDinamico(wordFields);
+      saveWords(); renderWordsGrid(); generarFormularioDinamico(wordFields);
       updateFieldsList(); updateFrontFieldOptions();
       alert("Datos importados correctamente.");
     }
@@ -1448,7 +1413,7 @@
         wordFieldsOrder = keys;
         wordFields = keys.map(k => ({ key: k, label: k, type: "text", required: false }));
       }
-      saveWords(); renderizarTabla(); generarFormularioDinamico(wordFields);
+      saveWords(); renderWordsGrid(); generarFormularioDinamico(wordFields);
       updateFieldsList(); updateFrontFieldOptions();
       alert("Datos fusionados correctamente.");
     }
@@ -1836,7 +1801,6 @@
       if (!thead) return;
       thead.innerHTML = "";
       const headerRow = document.createElement("tr");
-      // Se muestran las primeras 2 columnas
       wordFieldsOrder.slice(0,2).forEach(k => {
         const f = wordFields.find(x => x.key === k);
         if (f) {
@@ -1918,9 +1882,7 @@
       let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : (wordFieldsOrder[0] || "");
       let details = "";
       wordFields.forEach(field => {
-        if (field.key !== frontField) {
-          details += `<p><strong>${field.label}:</strong> ${word[field.key] || ""}</p>`;
-        }
+        if (field.key !== frontField) { details += `<p><strong>${field.label}:</strong> ${word[field.key] || ""}</p>`; }
       });
       document.getElementById("detailModalContent").innerHTML = details;
       document.getElementById("detailModal").classList.add("active");
@@ -1928,16 +1890,6 @@
 
     document.getElementById("closeDetailModal").addEventListener("click", () => {
       document.getElementById("detailModal").classList.remove("active");
-    });
-
-    // Evento para guardar lista personalizada (permite crear múltiples listas)
-    document.getElementById("btnSaveList").addEventListener("click", () => {
-      const name = document.getElementById("listNameInput").value.trim();
-      if (!name) { alert("Ingresa un nombre para la lista."); return; }
-      if (customPracticeList.length === 0) { alert("La lista está vacía."); return; }
-      const wordIds = customPracticeList.map(w => w.id);
-      savePersonalizedList(name, wordIds);
-      document.getElementById("listNameInput").value = "";
     });
 
     startCustomPracticeBtn.addEventListener("click", () => {
@@ -2079,7 +2031,6 @@
     function openFocusModal() { document.getElementById("focusModeModal").style.display = "block"; }
     function closeFocusModal() { document.getElementById("focusModeModal").style.display = "none"; }
 
-    // Se agrega el listener para el botón Focus Mode (ubicado ahora en la sección de Aprendizaje)
     const btnFocusMode = document.getElementById("btnFocusMode");
     if (btnFocusMode) {
       btnFocusMode.addEventListener("click", startFocusModeSession);
@@ -2106,8 +2057,8 @@
         document.getElementById("newWordsCount").value = settings.newWordsCount;
         document.getElementById("focusBlockSize").value = settings.focusBlockSize;
         document.getElementById("focusTestSize").value = settings.focusTestSize;
-        applyTheme();
       }
+      applyTheme();
     }
     const settingsForm = document.getElementById("settingsForm");
     settingsForm.addEventListener("submit", (e) => {
