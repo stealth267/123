@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- Se evita el zoom automático en iPhone -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Práctica con Carátulas – PC + Firebase</title>
   
   <!-- Librerías para CSV/Excel & Chart.js -->
@@ -33,9 +34,8 @@
     }
     .side-nav h2 { font-size: 18px; margin: 0 0 1em; text-align: center; }
     .side-nav button {
-      display: block; width: 100%; text-align: left;
-      margin: 10px 0; padding: 12px;
-      font-size: 16px; cursor: pointer;
+      display: block; width: 100%; text-align: left; margin: 0.2em 0;
+      padding: 10px; font-size: 16px; cursor: pointer;
       background: #fafafa; border: 1px solid #ddd; border-radius: 5px;
     }
     .menu-toggle {
@@ -68,11 +68,15 @@
       box-sizing: border-box;
     }
     form button {
-      padding: 10px 15px; font-size: 16px; cursor: pointer;
-      width: 100%; margin: 10px 0;
+      padding: 8px 12px; font-size: 16px; cursor: pointer;
+      width: 100%; margin: 5px 0;
     }
     .tabs { text-align: center; margin-bottom: 15px; }
-    .tabs button { margin: 5px; padding: 10px; font-size: 16px; cursor: pointer; }
+    /* En iPhone se agrega margen superior para separar los botones de pestañas de la selección de carátula */
+    @media only screen and (max-width: 600px) {
+      .tabs { margin-top: 20px; }
+    }
+    .tabs button { margin: 0 5px; padding: 8px 12px; font-size: 16px; cursor: pointer; }
     .tabContent { display: none; }
     .tabContent.active { display: block; }
     .dark-theme { background: #1e1e1e; color: #ff6600; }
@@ -228,13 +232,6 @@
       font-weight: bold;
       cursor: pointer;
     }
-    /* Separador entre la barra de progreso y el contenedor de práctica */
-    #practiceOptions {
-      margin-bottom: 1em;
-    }
-    #progressBarContainer {
-      margin-top: 1em;
-    }
     /* Ajustes para pantallas pequeñas (iPhone, etc.) */
     @media only screen and (max-width: 600px) {
       .caratula-cards {
@@ -258,22 +255,27 @@
       #failTable th, #failTable td {
          padding: 8px;
       }
-      .side-nav button {
-          margin: 10px 0;
-          padding: 12px;
-          font-size: 16px;
-      }
-      form button {
-          margin: 10px 0;
-          padding: 10px 15px;
-      }
-      .tabs button {
-          margin: 5px;
-          padding: 10px;
-      }
-      .session-buttons {
-          width: 100%;
-      }
+    }
+    /* Separador entre la barra de progreso y el contenedor de práctica */
+    #practiceOptions {
+      margin-bottom: 1em;
+    }
+    #progressBarContainer {
+      margin-top: 1em;
+    }
+    /* Para evitar zoom automático en iPhone en todos los inputs */
+    input, textarea, select {
+      font-size: 16px;
+    }
+    /* Estilo para el botón de agregar palabras en Aprendizaje */
+    .add-word-btn {
+      font-size: 24px;
+      padding: 10px 20px;
+      border: none;
+      background: #4caf50;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -493,6 +495,7 @@
           </div>
         </div>
         <div class="aprendizaje-block" style="text-align: center;">
+          <!-- Botón de agregar palabras con estilo optimizado para iPhone -->
           <button id="openAddTableModalBtn" class="add-word-btn">+</button>
         </div>
         <!-- Contenedor de la cuadrícula de palabras seleccionadas -->
