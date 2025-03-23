@@ -10,6 +10,9 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.17.0/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  
   <!-- Estilos (CSS) -->
   <style>
     /* Títulos centrados en todas las secciones */
@@ -319,26 +322,10 @@
       <!-- SECCIÓN PRACTICAR -->
       <section id="sectionPracticar">
         <h1>Modo Practicar</h1>
-        <div>
-          <label>Carátula:</label>
-          <select id="caratulaDropdownPracticar"></select>
-          <button id="confirmCaratulaPracticar">Confirmar</button>
-          <span id="caratulaDropdownPracticarCheck" style="display:none; color:green; font-weight:bold;">✔</span>
-        </div>
+        <button id="btnOpciones" data-toggle="modal" data-target="#practiceModal" style="float: right; margin-top: -40px;" class="btn btn-primary">Opciones</button>
         <br/>
-        <div id="practiceOptions">
-          <label for="practiceMode">Modo: </label>
-          <select id="practiceMode">
-            <option value="normal">Añadidas</option>
-            <option value="aleatorio">Aleatorio</option>
-            <option value="dificultad">Aleatorio por Dificultad</option>
-          </select>
-          <br/><br/>
-          <label for="frontField">Campo frontal:</label>
-          <select id="frontField"></select>
-          <button id="startPractice">Iniciar Práctica</button>
-        </div>
-        <div id="progressBarContainer">
+        <button id="startPractice" style="margin-bottom: 20px;" class="btn btn-success">Iniciar Práctica</button>
+        <div id="progressBarContainer" style="margin-top: 20px;">
           <div id="progressBar"></div>
           <div id="progressCount"></div>
         </div>
@@ -352,6 +339,46 @@
         <div class="session-buttons">
           <button id="finishSession" style="background:#ccc;">Terminar Sesión</button>
           <button id="resetSession" style="background:#ccc;">Resetear Sesión</button>
+        </div>
+
+        <!-- Modal de Opciones -->
+        <div class="modal fade" id="practiceModal" tabindex="-1" role="dialog" aria-labelledby="practiceModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="practiceModalLabel">Opciones de Práctica</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div>
+                  <label>Carátula:</label>
+                  <select id="caratulaDropdownPracticar"></select>
+                  <button id="confirmCaratulaPracticar">Confirmar</button>
+                  <span id="caratulaDropdownPracticarCheck" style="display:none; color:green; font-weight:bold;">✔</span>
+                </div>
+                <br/>
+                <div>
+                  <label for="practiceMode">Modo: </label>
+                  <select id="practiceMode">
+                    <option value="normal">Añadidas</option>
+                    <option value="aleatorio">Aleatorio</option>
+                    <option value="dificultad">Aleatorio por Dificultad</option>
+                  </select>
+                </div>
+                <br/>
+                <div>
+                  <label for="frontField">Campo frontal:</label>
+                  <select id="frontField"></select>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="confirmPracticeOptions">Confirmar</button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -593,6 +620,11 @@
       <div id="detailModalContent"></div>
     </div>
   </div>
+
+  <!-- Bootstrap JS y dependencias -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
   <!-- SCRIPT PRINCIPAL -->
   <script type="module">
@@ -1646,12 +1678,11 @@
       tbody.innerHTML = "";
       statsArray.forEach(obj => {
         const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${obj.campoFrontal}</td>
+        row.innerHTML = 
+          `<td>${obj.campoFrontal}</td>
           <td>${obj.total}</td>
           <td style="background-color: ${obtenerColor(obj)}">${obj.accuracy}</td>
-          <td><button onclick="resetStatsForWord('${obj.id}')">Resetear</button></td>
-        `;
+          <td><button onclick="resetStatsForWord('${obj.id}')">Resetear</button></td>`;
         tbody.appendChild(row);
       });
     }
@@ -1691,10 +1722,8 @@
       if (!frontField && wordFieldsOrder.length > 0) { frontField = wordFieldsOrder[0]; }
       const sessionStatsEl = document.getElementById("sessionStats");
       if (sessionStatsEl) {
-        sessionStatsEl.textContent = `
-          Practicadas: ${sessionPracticed} | Aciertos: ${correctCount} |
-          Errores: ${sessionPracticed - correctCount} | Racha: ${currentStreak}
-        `;
+        sessionStatsEl.textContent = 
+          `Practicadas: ${sessionPracticed} | Aciertos: ${correctCount} | Errores: ${sessionPracticed - correctCount} | Racha: ${currentStreak}`;
       }
       const tbody = document.querySelector("#sessionDetailTable tbody");
       if (!tbody) return;
@@ -2161,6 +2190,20 @@
       });
       return details;
     }
+
+    // EVENTO PARA GUARDAR LAS OPCIONES DEL MODAL DE PRÁCTICA Y CERRARLO, INICIANDO LA SESIÓN
+    document.getElementById("confirmPracticeOptions").addEventListener("click", () => {
+      const selectedCatId = document.getElementById("caratulaDropdownPracticar").value;
+      if (!selectedCatId) {
+        alert("Por favor, selecciona una carátula.");
+        return;
+      }
+      selectCategoryById(selectedCatId);
+      // Cierra el modal usando Bootstrap
+      $('#practiceModal').modal('hide');
+      // Inicia la sesión de práctica
+      startPracticeSession();
+    });
 
     window.addEventListener("DOMContentLoaded", () => {
       loadSettings(); initGlobalStatsSorting(); showSection("sectionCaratulas");
