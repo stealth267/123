@@ -2,8 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <!-- Se agregó maximum-scale=1.0 y user-scalable=no para evitar zoom automático en iPhone -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Práctica con Carátulas – PC + Firebase</title>
   
   <!-- Librerías para CSV/Excel & Chart.js -->
@@ -67,15 +66,15 @@
       margin: 5px 0; padding: 8px; font-size: 16px; width: 100%;
       box-sizing: border-box;
     }
+    /* Evitar zoom automático en iOS */
+    input, textarea, select {
+      font-size: 16px;
+    }
     form button {
       padding: 8px 12px; font-size: 16px; cursor: pointer;
       width: 100%; margin: 5px 0;
     }
     .tabs { text-align: center; margin-bottom: 15px; }
-    /* Se agrega margen superior extra para iPhone en la sección Gestionar */
-    @media only screen and (max-width: 600px) {
-      .tabs { margin-top: 20px; }
-    }
     .tabs button { margin: 0 5px; padding: 8px 12px; font-size: 16px; cursor: pointer; }
     .tabContent { display: none; }
     .tabContent.active { display: block; }
@@ -162,16 +161,14 @@
     #sectionNuevas td {
       padding: 10px;
     }
-    /* Modal de agregar palabras: se muestra solo las primeras 2 columnas y una columna de acción */
+    /* Modal de agregar palabras */
     #customPracticeResultsContainer {
       max-height: 300px;
       overflow-y: auto;
     }
-    /* Estilo para la fila seleccionada */
     .selected-result {
       background-color: #00575a;
     }
-    /* Cuadrícula de palabras personalizadas */
     .custom-practice-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -199,7 +196,7 @@
       background: #555;
       color: #fff;
     }
-    /* Modal inferior para ver más detalles de la palabra */
+    /* Modal inferior para detalles */
     .modal-bottom {
       display: none;
       position: fixed;
@@ -232,12 +229,39 @@
       font-weight: bold;
       cursor: pointer;
     }
-    /* Separador entre la barra de progreso y el contenedor de práctica */
+    /* Ajustes para pantallas pequeñas (iPhone) */
+    @media only screen and (max-width: 600px) {
+      .caratula-cards {
+        justify-content: center;
+        padding: 0 10px;
+      }
+      .caratula-card {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+      }
+      table, th, td {
+        font-size: 14px;
+        padding: 8px;
+      }
+      #failTable {
+         table-layout: fixed;
+         word-break: break-word;
+         font-size: 14px;
+      }
+      #failTable th, #failTable td {
+         padding: 8px;
+      }
+    }
     #practiceOptions {
       margin-bottom: 1em;
     }
     #progressBarContainer {
       margin-top: 1em;
+    }
+    /* Ajuste para la sección Gestionar */
+    #sectionGestionar > div:first-of-type {
+      margin-bottom: 20px;
     }
   </style>
 </head>
@@ -327,7 +351,7 @@
         </div>
         <div class="session-buttons">
           <button id="finishSession" style="background:#ccc;">Terminar Sesión</button>
-          <button id="resetSession"  style="background:#ccc;">Resetear Sesión</button>
+          <button id="resetSession" style="background:#ccc;">Resetear Sesión</button>
         </div>
       </section>
 
@@ -340,7 +364,6 @@
           <button id="confirmCaratulaGestionar">Confirmar</button>
           <span id="caratulaDropdownGestionarCheck" style="display:none; color:green; font-weight:bold;">✔</span>
         </div>
-        <!-- Los botones de "Palabras" y "Campos" cuentan con la clase tabs; el margen superior se aplica vía CSS para pantallas pequeñas -->
         <div class="tabs">
           <button id="tabPalabras">Palabras</button>
           <button id="tabCampos">Campos</button>
@@ -453,18 +476,14 @@
         </div>
         <div class="aprendizaje-block" id="savedListsWrapper">
           <button id="toggleSavedLists" class="toggle-saved-lists">≡</button>
-          <div id="savedListsContainer" class="saved-lists-container hidden">
-            <!-- Aquí se renderizan las listas guardadas -->
-          </div>
+          <div id="savedListsContainer" class="saved-lists-container hidden"></div>
         </div>
         <div class="aprendizaje-block" style="text-align: center;">
           <button id="openAddTableModalBtn" class="add-word-btn">+</button>
         </div>
-        <!-- Contenedor de la cuadrícula de palabras seleccionadas -->
         <div class="aprendizaje-block">
           <h2 style="font-size: 1em; margin-bottom: 0.5em;">Palabras Seleccionadas</h2>
           <div id="customPracticeGrid" class="custom-practice-grid"></div>
-          <!-- Contenedor para guardar lista -->
           <div class="list-save-container" style="display: flex; gap: 10px; align-items: center;">
             <input type="text" id="listNameInput" placeholder="Nombre de la lista"/>
             <button id="btnSaveList">Guardar Lista</button>
@@ -528,7 +547,7 @@
     </div>
   </div>
 
-  <!-- Modal para agregar palabras (tabla de resultados) -->
+  <!-- Modal para agregar palabras -->
   <div id="addTableModal" class="modal">
     <div class="modal-content">
       <span class="closeModal" id="closeAddTableModal">×</span>
@@ -567,12 +586,11 @@
     </div>
   </div>
 
-  <!-- Modal inferior para ver más detalles de la palabra -->
+  <!-- Modal inferior para detalles -->
   <div id="detailModal" class="modal-bottom">
     <div class="modal-content">
       <span class="closeModal" id="closeDetailModal">×</span>
-      <div id="detailModalContent">
-      </div>
+      <div id="detailModalContent"></div>
     </div>
   </div>
 
@@ -629,7 +647,7 @@
       problemThreshold: 2,
       audioEnabled: true,
       feedbackDelay: 500,
-      darkTheme: true, // Modo oscuro por defecto
+      darkTheme: true,
       notificationsEnabled: true,
       newWordsCount: 10,
       focusBlockSize: 5,
@@ -1054,7 +1072,11 @@
       const grid = document.getElementById("wordsGrid");
       if (!grid) return;
       grid.innerHTML = "";
-      let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : (wordFieldsOrder[0] || "");
+      if (wordFieldsOrder.length === 0) {
+        grid.innerHTML = "<p>No hay campos definidos para mostrar las palabras.</p>";
+        return;
+      }
+      let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : wordFieldsOrder[0];
       const totalWords = wordsToRender.length;
       const totalPages = Math.ceil(totalWords / pageSize);
       if (currentPage > totalPages) currentPage = totalPages < 1 ? 1 : totalPages;
@@ -1092,22 +1114,14 @@
     document.getElementById("wordSearch").addEventListener("input", () => {
       const term = document.getElementById("wordSearch").value.toLowerCase();
       if (term === "") { currentPage = 1; renderWordsGrid(); return; }
+      if (wordFieldsOrder.length === 0) {
+        alert("No hay campos definidos para buscar.");
+        return;
+      }
       const filtered = words.filter(w => wordFieldsOrder.some(k => String(w[k] || "").toLowerCase().includes(term)));
       renderWordsGrid(filtered);
       const paginationInfo = document.getElementById("paginationInfo");
       if (paginationInfo) { paginationInfo.textContent = `Mostrando ${filtered.length} resultado(s)`; }
-    });
-
-    // Se añade event listener para la búsqueda en el pop-up (customPracticeSearch)
-    const customPracticeSearch = document.getElementById("customPracticeSearch");
-    customPracticeSearch.addEventListener("input", () => {
-      const term = customPracticeSearch.value.toLowerCase();
-      if (term === "") {
-        renderCustomPracticeResultsBody(words);
-      } else {
-        const filtered = words.filter(w => wordFieldsOrder.some(k => String(w[k] || "").toLowerCase().includes(term)));
-        renderCustomPracticeResultsBody(filtered);
-      }
     });
 
     document.getElementById("wordForm").addEventListener("submit", function(e) {
@@ -1768,6 +1782,7 @@
       renderCustomPracticeGrid();
     }
 
+    const customPracticeSearch = document.getElementById("customPracticeSearch");
     const customPracticeResultsTable = document.getElementById("customPracticeResults");
     const startCustomPracticeBtn = document.getElementById("startCustomPractice");
 
