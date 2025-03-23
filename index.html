@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <!-- Se evita el zoom automático en iPhone -->
+  <!-- Se agregó maximum-scale=1.0 y user-scalable=no para evitar zoom automático en iPhone -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Práctica con Carátulas – PC + Firebase</title>
   
@@ -72,7 +72,7 @@
       width: 100%; margin: 5px 0;
     }
     .tabs { text-align: center; margin-bottom: 15px; }
-    /* En iPhone se agrega margen superior para separar los botones de pestañas de la selección de carátula */
+    /* Se agrega margen superior extra para iPhone en la sección Gestionar */
     @media only screen and (max-width: 600px) {
       .tabs { margin-top: 20px; }
     }
@@ -232,50 +232,12 @@
       font-weight: bold;
       cursor: pointer;
     }
-    /* Ajustes para pantallas pequeñas (iPhone, etc.) */
-    @media only screen and (max-width: 600px) {
-      .caratula-cards {
-        justify-content: center;
-        padding: 0 10px;
-      }
-      .caratula-card {
-        width: 100%;
-        max-width: 300px;
-        margin: 0 auto;
-      }
-      table, th, td {
-        font-size: 14px;
-        padding: 8px;
-      }
-      #failTable {
-         table-layout: fixed;
-         word-break: break-word;
-         font-size: 14px;
-      }
-      #failTable th, #failTable td {
-         padding: 8px;
-      }
-    }
     /* Separador entre la barra de progreso y el contenedor de práctica */
     #practiceOptions {
       margin-bottom: 1em;
     }
     #progressBarContainer {
       margin-top: 1em;
-    }
-    /* Para evitar zoom automático en iPhone en todos los inputs */
-    input, textarea, select {
-      font-size: 16px;
-    }
-    /* Estilo para el botón de agregar palabras en Aprendizaje */
-    .add-word-btn {
-      font-size: 24px;
-      padding: 10px 20px;
-      border: none;
-      background: #4caf50;
-      color: #fff;
-      border-radius: 5px;
-      cursor: pointer;
     }
   </style>
 </head>
@@ -378,6 +340,7 @@
           <button id="confirmCaratulaGestionar">Confirmar</button>
           <span id="caratulaDropdownGestionarCheck" style="display:none; color:green; font-weight:bold;">✔</span>
         </div>
+        <!-- Los botones de "Palabras" y "Campos" cuentan con la clase tabs; el margen superior se aplica vía CSS para pantallas pequeñas -->
         <div class="tabs">
           <button id="tabPalabras">Palabras</button>
           <button id="tabCampos">Campos</button>
@@ -495,7 +458,6 @@
           </div>
         </div>
         <div class="aprendizaje-block" style="text-align: center;">
-          <!-- Botón de agregar palabras con estilo optimizado para iPhone -->
           <button id="openAddTableModalBtn" class="add-word-btn">+</button>
         </div>
         <!-- Contenedor de la cuadrícula de palabras seleccionadas -->
@@ -1134,6 +1096,18 @@
       renderWordsGrid(filtered);
       const paginationInfo = document.getElementById("paginationInfo");
       if (paginationInfo) { paginationInfo.textContent = `Mostrando ${filtered.length} resultado(s)`; }
+    });
+
+    // Se añade event listener para la búsqueda en el pop-up (customPracticeSearch)
+    const customPracticeSearch = document.getElementById("customPracticeSearch");
+    customPracticeSearch.addEventListener("input", () => {
+      const term = customPracticeSearch.value.toLowerCase();
+      if (term === "") {
+        renderCustomPracticeResultsBody(words);
+      } else {
+        const filtered = words.filter(w => wordFieldsOrder.some(k => String(w[k] || "").toLowerCase().includes(term)));
+        renderCustomPracticeResultsBody(filtered);
+      }
     });
 
     document.getElementById("wordForm").addEventListener("submit", function(e) {
@@ -1794,7 +1768,6 @@
       renderCustomPracticeGrid();
     }
 
-    const customPracticeSearch = document.getElementById("customPracticeSearch");
     const customPracticeResultsTable = document.getElementById("customPracticeResults");
     const startCustomPracticeBtn = document.getElementById("startCustomPractice");
 
@@ -1885,7 +1858,9 @@
       let frontField = document.getElementById("frontField") ? document.getElementById("frontField").value : (wordFieldsOrder[0] || "");
       let details = "";
       wordFields.forEach(field => {
-        if (field.key !== frontField) { details += `<p><strong>${field.label}:</strong> ${word[field.key] || ""}</p>`; }
+        if (field.key !== frontField) {
+          details += `<p><strong>${field.label}:</strong> ${word[field.key] || ""}</p>`;
+        }
       });
       document.getElementById("detailModalContent").innerHTML = details;
       document.getElementById("detailModal").classList.add("active");
