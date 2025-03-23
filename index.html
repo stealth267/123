@@ -336,6 +336,7 @@
           <button id="finishSession" style="background:#ccc;">Terminar Sesión</button>
           <button id="resetSession"  style="background:#ccc;">Resetear Sesión</button>
         </div>
+        <!-- Se eliminó el botón Focus Mode de esta sección -->
       </section>
 
       <!-- SECCIÓN GESTIONAR -->
@@ -481,6 +482,10 @@
         </div>
         <div style="text-align: center;">
           <button id="startCustomPractice" class="btn-iniciar-practica">Iniciar Práctica Personalizada</button>
+        </div>
+        <!-- Botón Focus Mode agregado en la sección Aprendizaje -->
+        <div style="text-align: center; margin-top: 1em;">
+          <button id="btnFocusMode" style="background:#ccc;">Focus Mode</button>
         </div>
       </section>
 
@@ -2074,7 +2079,11 @@
     function openFocusModal() { document.getElementById("focusModeModal").style.display = "block"; }
     function closeFocusModal() { document.getElementById("focusModeModal").style.display = "none"; }
 
-    document.getElementById("btnFocusMode").addEventListener("click", startFocusModeSession);
+    // Se agrega el listener para el botón Focus Mode (ubicado ahora en la sección de Aprendizaje)
+    const btnFocusMode = document.getElementById("btnFocusMode");
+    if (btnFocusMode) {
+      btnFocusMode.addEventListener("click", startFocusModeSession);
+    }
 
     function applyTheme() {
       if (document.getElementById("darkTheme").checked) { document.body.classList.add("dark-theme"); settings.darkTheme = true; }
