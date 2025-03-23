@@ -1786,6 +1786,21 @@
     const customPracticeResultsTable = document.getElementById("customPracticeResults");
     const startCustomPracticeBtn = document.getElementById("startCustomPractice");
 
+    // EVENTO: Buscador en el modal "Agregar Palabras"
+    customPracticeSearch.addEventListener("input", () => {
+      const term = customPracticeSearch.value.toLowerCase();
+      let filtered;
+      if (term === "") {
+        filtered = words; // mostrar todas las palabras si no hay término
+      } else {
+        filtered = words.filter(w => {
+          // se filtra en los dos primeros campos definidos en wordFieldsOrder
+          return wordFieldsOrder.slice(0,2).some(k => String(w[k] || "").toLowerCase().includes(term));
+        });
+      }
+      renderCustomPracticeResultsBody(filtered);
+    });
+
     function renderCustomPracticeResultsHeader() {
       if (!customPracticeResultsTable) return;
       const thead = customPracticeResultsTable.querySelector("thead");
